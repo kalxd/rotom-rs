@@ -1,5 +1,7 @@
 use ntex::web;
 
+mod data;
+
 #[web::get("/")]
 async fn index() -> impl web::Responder {
 	"hello world"

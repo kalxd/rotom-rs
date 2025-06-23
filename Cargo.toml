@@ -5,6 +5,11 @@ edition = "2024"
 
 [dependencies]
 
+[dependencies.config]
+version = "0.15.11"
+default-features = false
+features = ["toml"]
+
 [dependencies.ntex]
 version = "2.13.2"
 default-features = false
