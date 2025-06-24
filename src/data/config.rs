@@ -2,6 +2,8 @@ use config::{Config as ConfigLib, File};
 use serde::Deserialize;
 use std::fs;
 
+use super::error::{Error, Result};
+
 #[derive(Debug, Deserialize)]
 pub struct ConfigDb {
 	db: String,
@@ -17,7 +19,7 @@ pub struct Config {
 	database: ConfigDb,
 }
 
-pub fn load_config() -> Config {
+pub fn load_config() -> Result<Config> {
 	const DEFAULT_CONFIG: &str = "config/default.toml";
 	const CUSTOM_CONFIG: &str = "config/config.toml";
 
@@ -28,5 +30,9 @@ pub fn load_config() -> Config {
 		config
 	};
 
-	config.build().unwrap().try_deserialize().unwrap()
+	config
+		.build()
+		.map_err(Error::internal)?
+		.try_deserialize()
+		.map_err(Error::internal)
 }
