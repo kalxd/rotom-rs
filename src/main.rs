@@ -15,7 +15,7 @@ async fn index() -> impl web::Responder {
 #[ntex::main]
 async fn main() -> Result<()> {
 	let config = load_config()?;
-	dbg!(config);
+	let poll = config.make_db_connection().await?;
 
 	web::HttpServer::new(|| web::App::new().service(index))
 		.bind(("127.0.0.1", 8080))
