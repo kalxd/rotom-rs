@@ -16,9 +16,9 @@ async fn index() -> impl web::Responder {
 #[ntex::main]
 async fn main() -> Result<()> {
 	let config = load_config()?;
-	let env = AppState::from_config(&config).await?;
+	let state = AppState::from_config(&config).await?;
 
-	web::HttpServer::new(move || web::App::new().state(env.clone()).service(index))
+	web::HttpServer::new(move || web::App::new().state(state.clone()).service(index))
 		.bind(("127.0.0.1", 3000))
 		.map_err(Error::internal)?
 		.run()
