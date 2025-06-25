@@ -3,6 +3,7 @@ use ntex::web;
 mod data;
 
 use data::{
+	AppState,
 	config::load_config,
 	error::{Error, Result},
 };
@@ -15,10 +16,10 @@ async fn index() -> impl web::Responder {
 #[ntex::main]
 async fn main() -> Result<()> {
 	let config = load_config()?;
-	let poll = config.make_db_connection().await?;
+	let env = AppState::from_config(&config).await?;
 
-	web::HttpServer::new(|| web::App::new().service(index))
-		.bind(("127.0.0.1", 8080))
+	web::HttpServer::new(move || web::App::new().state(env.clone()).service(index))
+		.bind(("127.0.0.1", 3000))
 		.map_err(Error::internal)?
 		.run()
 		.await

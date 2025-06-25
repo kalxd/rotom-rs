@@ -16,8 +16,8 @@ pub struct ConfigDb {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-	salt: String,
-	database: ConfigDb,
+	pub salt: String,
+	pub database: ConfigDb,
 }
 
 pub fn load_config() -> Result<Config> {
