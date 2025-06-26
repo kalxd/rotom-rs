@@ -1,5 +1,7 @@
-use ntex::web::{ErrorRenderer, Scope, scope};
+use ntex::web::{DefaultError, Scope, scope};
 
-pub fn api<E: ErrorRenderer>() -> Scope<E> {
-	scope("/")
+mod user;
+
+pub fn api() -> Scope<DefaultError> {
+	scope("/").service(user::api())
 }

@@ -4,11 +4,12 @@ use sqlx::PgPool;
 
 pub mod config;
 pub mod error;
+pub mod ty;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
-	salt: Arc<String>,
-	db: PgPool,
+	pub salt: Arc<String>,
+	pub db: PgPool,
 }
 
 impl AppState {
