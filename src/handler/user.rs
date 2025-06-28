@@ -2,9 +2,19 @@ use ntex::web::{
 	DefaultError, Scope, post, scope,
 	types::{Json, State},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-use crate::data::{AppState, error::Result, ty::SaltPassword};
+use crate::data::{
+	AppState, User,
+	error::{self, Result},
+	ty::SaltPassword,
+};
+
+#[derive(Debug, Serialize)]
+struct SessionUser {
+	token: String,
+	user: User,
+}
 
 #[derive(Debug, Deserialize)]
 struct LoginBody {
@@ -13,10 +23,37 @@ struct LoginBody {
 }
 
 #[post("/login")]
-async fn login(body: Json<LoginBody>, state: State<AppState>) -> Result<Json<()>> {
+async fn login(body: Json<LoginBody>, state: State<AppState>) -> Result<Json<SessionUser>> {
 	let salt = SaltPassword::new(&body.password, &state.salt);
 
-	Ok(Json(()))
+	let user = sqlx::query_as!(
+		User,
+		r#"
+select
+编号 as id, 用户名 as username
+from 用户
+where 用户名 = $1 and 密码 = $2
+"#,
+		&body.username,
+		&salt as &SaltPassword
+	)
+	.fetch_optional(&state.db)
+	.await?
+	.ok_or(error::Error::not_auth("用户名或密码不正确！"))?;
+
+	let token = sqlx::query_scalar!(
+		r#"
+insert into
+用户会话 (用户编号)
+values ($1)
+returning 令牌
+"#,
+		user.id
+	)
+	.fetch_one(&state.db)
+	.await?;
+
+	Ok(Json(SessionUser { token, user }))
 }
 
 pub fn api() -> Scope<DefaultError> {

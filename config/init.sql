@@ -11,6 +11,6 @@ create table if not exists "用户" (
 create table if not exists "用户会话" (
 	编号 int primary key generated always as identity,
 	用户编号 int not null references "用户" ("编号"),
-	记号 uuid not null unique,
+	令牌 uuid not null unique default gen_random_uuid(),
 	创建日期 timestamptz not null default now()
 );
