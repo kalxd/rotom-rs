@@ -27,9 +27,7 @@ impl AppState {
 
 #[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct User {
-	#[sqlx(rename = "编号")]
 	pub id: i32,
-	#[sqlx(rename = "用户名")]
 	pub username: String,
 }
 
@@ -45,12 +43,26 @@ impl<E: ErrorRenderer> FromRequest<E> for User {
 			.get("XGToken")
 			.ok_or(error::Error::not_auth("未填写令牌！"))?
 			.to_str()
-			.map_err(|e| error::Error::not_auth(e))?;
+			.map_err(error::Error::not_auth)?;
+
+		let uuid = ty::Uuid::try_from(token).map_err(error::Error::not_auth)?;
 
 		let state = req
 			.app_state::<AppState>()
 			.ok_or(error::Error::internal("依赖未成功注入！"))?;
 
-		todo!()
+		let user = sqlx::query_as!(
+			User,
+			r#"
+select u.编号 as id, u.用户名 as username from 用户会话 as s
+inner join 用户 as u on u.编号 = s.用户编号
+where s.令牌 = $1
+"#,
+			uuid as ty::Uuid
+		)
+		.fetch_optional(&state.db)
+		.await?;
+
+		user.ok_or(error::Error::not_auth("用户不存在！"))
 	}
 }

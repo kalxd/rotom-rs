@@ -1,5 +1,5 @@
 use ntex::web::{
-	DefaultError, Scope, post, scope,
+	DefaultError, Scope, get, post, scope,
 	types::{Json, State},
 };
 use serde::{Deserialize, Serialize};
@@ -20,6 +20,11 @@ struct SessionUser {
 struct LoginBody {
 	username: String,
 	password: String,
+}
+
+#[get("/self")]
+async fn self_info(user: Option<User>) -> Result<Json<Option<User>>> {
+	Ok(Json(user))
 }
 
 #[post("/login")]
@@ -57,5 +62,5 @@ returning 令牌 as "token!: Uuid"
 }
 
 pub fn api() -> Scope<DefaultError> {
-	scope("/user").service(login)
+	scope("/user").service(self_info).service(login)
 }
