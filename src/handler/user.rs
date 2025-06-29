@@ -7,12 +7,12 @@ use serde::{Deserialize, Serialize};
 use crate::data::{
 	AppState, User,
 	error::{self, Result},
-	ty::SaltPassword,
+	ty::{SaltPassword, Uuid},
 };
 
 #[derive(Debug, Serialize)]
 struct SessionUser {
-	token: String,
+	token: Uuid,
 	user: User,
 }
 
@@ -46,7 +46,7 @@ where 用户名 = $1 and 密码 = $2
 insert into
 用户会话 (用户编号)
 values ($1)
-returning 令牌
+returning 令牌 as "token!: Uuid"
 "#,
 		user.id
 	)

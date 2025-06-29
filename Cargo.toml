@@ -6,6 +6,10 @@ edition = "2024"
 [dependencies]
 object_store = "0.12.2"
 
+[dependencies.uuid]
+version = "1.16.0"
+features = ["v4"]
+
 [dependencies.serde]
 version = "1.0.219"
 features = ["derive"]
