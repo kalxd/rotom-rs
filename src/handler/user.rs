@@ -32,7 +32,7 @@ async fn login(body: Json<LoginBody>, state: State<AppState>) -> Result<Json<Ses
 select
 编号 as id, 用户名 as username
 from 用户
-where 用户名 = $1 and 密码 = $2
+where 用户名 = $1 and 密码 = md5($2)
 "#,
 		&body.username,
 		&salt as &SaltPassword
