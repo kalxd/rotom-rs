@@ -1,4 +1,5 @@
 create extension if not exists ltree;
+
 create extension if not exists zhparser;
 
 create text search configuration china (parser = zhparser);
