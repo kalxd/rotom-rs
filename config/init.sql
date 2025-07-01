@@ -1,5 +1,3 @@
-create extension if not exists ltree;
-
 create extension if not exists zhparser;
 
 create text search configuration china (parser = zhparser);
@@ -20,6 +18,13 @@ create table if not exists "用户会话" (
 	创建日期 timestamptz not null default now()
 );
 
+create table if not exists "分类" (
+	编号 int primary key generated always as identity,
+	用户编号 int not null references 用户 (编号),
+	名称 varchar(32) not null,
+	创建日期 timestamptz not null default now()
+);
+
 create table if not exists "文件" (
 	编号 int primary key generated always as identity,
 	特征 text not null unique,
@@ -29,9 +34,8 @@ create table if not exists "文件" (
 
 create table if not exists "表情" (
 	编号 int primary key generated always as identity,
-	用户编号 int not null references 用户 (编号),
+	分类编号 int references 分类 (编号),
 	文件编号 int not null references 文件 (编号),
-	路径 ltree,
 	描述 text,
 	创建日期 timestamptz not null default now()
 );
