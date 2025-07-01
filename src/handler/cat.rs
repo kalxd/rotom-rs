@@ -1,8 +1,8 @@
 use ntex::web::{
-	DefaultError, Scope, get, scope,
+	DefaultError, Scope, get, post, scope,
 	types::{Json, State},
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::data::{AppState, User, error::Result};
 
@@ -30,6 +30,16 @@ where 用户编号 = $1
 	Ok(Json(cats))
 }
 
+#[derive(Debug, Deserialize)]
+struct CreateCatBody {
+	name: String,
+}
+
+#[post("/create")]
+async fn create_cat(body: Json<CreateCatBody>) -> Result<Json<()>> {
+	Ok(Json(()))
+}
+
 pub fn api() -> Scope<DefaultError> {
-	scope("/self/cat").service(get_all_cat)
+	scope("/self/cat").service(get_all_cat).service(create_cat)
 }
