@@ -4,7 +4,7 @@ use ntex::web::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::data::{AppState, User, error::Result};
+use crate::data::{AppState, User, error::Result, ty::UpdateBody};
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct Cat {
@@ -58,6 +58,38 @@ returning 编号 as id, 名称 as name
 	Ok(Json(cat))
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdateCatBody {
+	name: String,
+}
+
+#[post("/update")]
+async fn update_cat(
+	body: Json<UpdateBody<UpdateCatBody>>,
+	user: User,
+	state: State<AppState>,
+) -> Result<Json<Option<Cat>>> {
+	let cat = sqlx::query_as!(
+		Cat,
+		r#"
+update 分类
+set 名称 = $1
+where 编号 = $2 and 用户编号 = $3
+returning 编号 as id, 名称 as name
+"#,
+		body.data.name,
+		body.id,
+		user.id
+	)
+	.fetch_optional(&state.db)
+	.await?;
+
+	Ok(Json(cat))
+}
+
 pub fn api() -> Scope<DefaultError> {
-	scope("/self/cat").service(get_all_cat).service(create_cat)
+	scope("/self/cat")
+		.service(get_all_cat)
+		.service(create_cat)
+		.service(update_cat)
 }

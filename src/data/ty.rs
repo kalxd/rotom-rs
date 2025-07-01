@@ -43,3 +43,9 @@ impl SaltPassword {
 		Self(String::from(format!("{salt}-{password}-{salt}")))
 	}
 }
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateBody<T> {
+	pub id: i32,
+	pub data: T,
+}
