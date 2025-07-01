@@ -3,8 +3,12 @@ name = "rotom-rs"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+members = ["drv"]
+
 [dependencies]
 object_store = "0.12.2"
+drv = { path = "./drv" }
 
 [dependencies.uuid]
 version = "1.16.0"
