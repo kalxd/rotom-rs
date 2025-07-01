@@ -1,8 +1,5 @@
 use ntex::web::{DefaultError, Scope, scope};
 
-mod cat;
-mod user;
-
 pub fn api() -> Scope<DefaultError> {
-	scope("/").service(user::api()).service(cat::api())
+	scope("/self/cat")
 }
