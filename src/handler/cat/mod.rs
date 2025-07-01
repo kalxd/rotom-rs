@@ -36,8 +36,26 @@ struct CreateCatBody {
 }
 
 #[post("/create")]
-async fn create_cat(body: Json<CreateCatBody>) -> Result<Json<()>> {
-	Ok(Json(()))
+async fn create_cat(
+	body: Json<CreateCatBody>,
+	user: User,
+	state: State<AppState>,
+) -> Result<Json<Cat>> {
+	let cat = sqlx::query_as!(
+		Cat,
+		r#"
+insert into 分类
+(用户编号, 名称)
+values ($1, $2)
+returning 编号 as id, 名称 as name
+"#,
+		user.id,
+		body.name
+	)
+	.fetch_one(&state.db)
+	.await?;
+
+	Ok(Json(cat))
 }
 
 pub fn api() -> Scope<DefaultError> {
