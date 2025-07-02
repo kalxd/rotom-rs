@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
 	let state = AppState::from_config(&config).await?;
 
 	web::HttpServer::new(move || web::App::new().state(state.clone()).service(handler::api()))
-		.bind(("127.0.0.1", 3000))
+		.bind(("0.0.0.0", 3000))
 		.map_err(Error::internal)?
 		.run()
 		.await

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect u.编号 as id, u.用户名 as username from 用户会话 as s\ninner join 用户 as u on u.编号 = s.用户编号\nwhere s.令牌 = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "cf3c59b1282e8cb14378129cdef919466c018e01ac051020ecd0604aa0bdd8af"
+}

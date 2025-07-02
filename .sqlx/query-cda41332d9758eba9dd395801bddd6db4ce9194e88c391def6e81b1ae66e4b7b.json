@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n编号 as id, 用户名 as username\nfrom 用户\nwhere 用户名 = $1 and 密码 = md5($2)\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "cda41332d9758eba9dd395801bddd6db4ce9194e88c391def6e81b1ae66e4b7b"
+}

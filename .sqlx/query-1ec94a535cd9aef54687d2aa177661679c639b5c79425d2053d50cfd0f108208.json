@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into 分类\n(用户编号, 名称)\nvalues ($1, $2)\nreturning 编号 as id, 名称 as name\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "1ec94a535cd9aef54687d2aa177661679c639b5c79425d2053d50cfd0f108208"
+}
