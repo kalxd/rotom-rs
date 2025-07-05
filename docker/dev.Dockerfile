@@ -1,4 +1,4 @@
-FROM sample as builder
+FROM 192.168.31.10:5000/rotom-rs:base-0.0.1 AS builder
 
 COPY .sqlx .sqlx
 COPY src src
