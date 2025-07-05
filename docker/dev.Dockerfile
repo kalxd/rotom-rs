@@ -8,6 +8,7 @@ RUN cargo build --release
 FROM 192.168.31.10:5000/rust:1.88.0
 
 COPY --from=builder /opt/app/target/release/rotom-rs /opt/app/rotom-rs
+COPY config/default.toml config/default.toml
 
 EXPOSE 3000
 
