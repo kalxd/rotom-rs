@@ -11,6 +11,8 @@ use data::{
 
 #[ntex::main]
 async fn main() -> Result<()> {
+	println!("start it!!!!");
+
 	let config = load_config()?;
 	let state = AppState::from_config(&config).await?;
 
