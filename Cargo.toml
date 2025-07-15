@@ -9,6 +9,7 @@ members = ["drv"]
 [dependencies]
 object_store = "0.12.2"
 ntex-multipart = "2.0.0"
+sha2 = "0.10.9"
 drv = { path = "./drv" }
 
 [dependencies.uuid]
@@ -23,6 +24,10 @@ features = ["derive"]
 version = "0.15.11"
 default-features = false
 features = ["toml"]
+
+[dependencies.futures]
+version = "0.3.31"
+default-features = false
 
 [dependencies.ntex]
 version = "2.13.2"

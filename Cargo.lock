@@ -1597,10 +1597,12 @@ version = "0.1.0"
 dependencies = [
  "config",
  "drv",
+ "futures",
  "ntex",
  "ntex-multipart",
  "object_store",
  "serde",
+ "sha2",
  "sqlx",
  "uuid",
 ]
