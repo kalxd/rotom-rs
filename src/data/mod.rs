@@ -6,6 +6,7 @@ use sqlx::PgPool;
 
 pub mod config;
 pub mod error;
+pub mod file;
 pub mod ty;
 
 #[derive(Debug, Clone)]

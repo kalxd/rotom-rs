@@ -13,6 +13,8 @@ use data::{
 async fn main() -> Result<()> {
 	println!("start it!!!!");
 
+	data::file::ensure_base_dir()?;
+
 	let config = load_config()?;
 	let state = AppState::from_config(&config).await?;
 
