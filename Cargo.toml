@@ -8,6 +8,7 @@ members = ["drv"]
 
 [dependencies]
 object_store = "0.12.2"
+ntex-multipart = "2.0.0"
 drv = { path = "./drv" }
 
 [dependencies.uuid]
