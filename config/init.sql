@@ -25,10 +25,12 @@ create table if not exists "分类" (
 	创建日期 timestamptz not null default now()
 );
 
+create type file_type as enum ('png', 'jpg', 'webp');
+
 create table if not exists "文件" (
 	编号 int primary key generated always as identity,
 	特征 text not null unique,
-	扩展名 varchar(8),
+	扩展名 file_type not null,
 	创建日期 timestamptz not null default now()
 );
 

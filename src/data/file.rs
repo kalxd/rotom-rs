@@ -3,7 +3,10 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use super::error::{Error, Result};
+use super::{
+	error::{Error, Result},
+	ty::FileExtension,
+};
 
 const BASE_DIR: &str = "static";
 
@@ -12,10 +15,10 @@ pub fn ensure_base_dir() -> Result<()> {
 	fs::create_dir_all(path).map_err(Error::internal)
 }
 
-pub fn with_filename(filename: &str, ext: &str) -> PathBuf {
+pub fn with_filename(filename: &str, ext: &FileExtension) -> PathBuf {
 	let mut path = PathBuf::from(BASE_DIR);
 
 	path.push(filename);
-	path.set_extension(ext);
+	path.set_extension(ext.to_string());
 	path
 }

@@ -44,6 +44,26 @@ impl SaltPassword {
 	}
 }
 
+#[derive(Debug, sqlx::Type, Serialize)]
+#[sqlx(type_name = "file_type")]
+#[sqlx(rename_all = "lowercase")]
+#[serde(rename_all = "camelCase")]
+pub enum FileExtension {
+	Jpg,
+	Png,
+	Webp,
+}
+
+impl std::fmt::Display for FileExtension {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Self::Jpg => write!(f, "jpg"),
+			Self::Png => write!(f, "png"),
+			Self::Webp => write!(f, "webp"),
+		}
+	}
+}
+
 #[derive(Debug, Deserialize)]
 pub struct UpdateBody<T> {
 	pub id: i32,

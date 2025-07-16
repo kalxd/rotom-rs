@@ -44,6 +44,18 @@ impl From<sqlx::Error> for Error {
 	}
 }
 
+impl From<std::io::Error> for Error {
+	fn from(value: std::io::Error) -> Self {
+		Self::internal(value)
+	}
+}
+
+impl From<ntex_multipart::MultipartError> for Error {
+	fn from(value: ntex_multipart::MultipartError) -> Self {
+		Self::illegal(value)
+	}
+}
+
 impl WebResponseError for Error {
 	fn status_code(&self) -> StatusCode {
 		match self {
