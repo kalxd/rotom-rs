@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect 扩展名 as \"extension!: FileExtension\" from 文件\nwhere 特征 = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "extension!: FileExtension",
+        "type_info": {
+          "Custom": {
+            "name": "file_type",
+            "kind": {
+              "Enum": [
+                "png",
+                "jpg",
+                "webp"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ed902880fb46d44647d88afe7a272abbd18847306cafbf7ddc49b3b1d1e06744"
+}

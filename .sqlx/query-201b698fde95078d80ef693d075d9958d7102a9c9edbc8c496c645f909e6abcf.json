@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into 文件\n(特征, 扩展名)\nvalues ($1, $2)\non conflict (特征) do update\nset 创建日期 = now()\nreturning 编号 as id, 特征 as sha, 扩展名 as \"extension: FileExtension\";\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "sha",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "extension: FileExtension",
+        "type_info": {
+          "Custom": {
+            "name": "file_type",
+            "kind": {
+              "Enum": [
+                "png",
+                "jpg",
+                "webp"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "file_type",
+            "kind": {
+              "Enum": [
+                "png",
+                "jpg",
+                "webp"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "201b698fde95078d80ef693d075d9958d7102a9c9edbc8c496c645f909e6abcf"
+}
