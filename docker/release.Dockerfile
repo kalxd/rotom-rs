@@ -7,7 +7,7 @@ COPY src src
 
 RUN cargo build --release
 
-FROM debian:12.11-slim
+FROM debian:bookworm-slim
 
 WORKDIR /opt/app
 
