@@ -8,8 +8,10 @@ use serde::Serialize;
 pub enum Error {
 	/// 未登录，或者权限不足。
 	NotAuth(String),
-	/// 前端提供参数不合法
+	/// 前端提供参数不合法。
 	Illegal(String),
+	/// 资源未找到。
+	NotFound(String),
 	/// 内部错误。
 	Internal(String),
 }
@@ -25,6 +27,7 @@ macro_rules! error_fn {
 impl Error {
 	error_fn!(not_auth, NotAuth);
 	error_fn!(illegal, Illegal);
+	error_fn!(not_found, NotFound);
 	error_fn!(internal, Internal);
 }
 
@@ -33,6 +36,7 @@ impl std::fmt::Display for Error {
 		match self {
 			Self::NotAuth(s) => write!(f, "验证失败：{s}"),
 			Self::Illegal(s) => write!(f, "参数错误：{s}"),
+			Self::NotFound(s) => write!(f, "资源不存在：{s}"),
 			Self::Internal(s) => write!(f, "内部错误：{s}"),
 		}
 	}
@@ -61,6 +65,7 @@ impl WebResponseError for Error {
 		match self {
 			Self::NotAuth(_) => StatusCode::FORBIDDEN,
 			Self::Illegal(_) => StatusCode::NOT_ACCEPTABLE,
+			Self::NotFound(_) => StatusCode::NOT_FOUND,
 			Self::Internal(_) => StatusCode::BAD_REQUEST,
 		}
 	}

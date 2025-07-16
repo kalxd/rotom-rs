@@ -2,9 +2,10 @@ use std::{fs, io::Write};
 
 use futures::StreamExt;
 use ntex::web::{
-	DefaultError, Scope, post, scope,
-	types::{Json, State},
+	DefaultError, Scope, get, post, scope,
+	types::{Json, Path, State},
 };
+use ntex_files::NamedFile;
 use ntex_multipart::Multipart;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
@@ -92,6 +93,22 @@ returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
 	Ok(Json(file))
 }
 
+#[get("/view/{id}")]
+async fn view_file(id: Path<String>, state: State<AppState>) -> Result<NamedFile> {
+	let ext = sqlx::query_scalar!(
+		r#"
+select 扩展名 as "extension!: FileExtension" from 文件
+where 特征 = $1
+"#,
+		*id
+	)
+	.fetch_optional(&state.db)
+	.await?
+	.ok_or(Error::not_found("文件不存在！"))?;
+	let filepath = file::with_filename(&id, &ext);
+	Ok(NamedFile::open(filepath)?)
+}
+
 pub fn api() -> Scope<DefaultError> {
-	scope("/file").service(upload_file)
+	scope("/file").service(upload_file).service(view_file)
 }
