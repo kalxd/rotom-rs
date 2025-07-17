@@ -3,11 +3,7 @@ use ntex::web;
 mod data;
 mod handler;
 
-use data::{
-	AppState,
-	config::load_config,
-	error::{Error, Result},
-};
+use data::{AppState, config::load_config, error::Result};
 
 #[ntex::main]
 async fn main() -> Result<()> {
@@ -19,9 +15,9 @@ async fn main() -> Result<()> {
 	let state = AppState::from_config(&config).await?;
 
 	web::HttpServer::new(move || web::App::new().state(state.clone()).service(handler::api()))
-		.bind(("0.0.0.0", 3000))
-		.map_err(Error::internal)?
+		.bind(("0.0.0.0", 3000))?
 		.run()
-		.await
-		.map_err(Error::internal)
+		.await?;
+
+	Ok(())
 }
