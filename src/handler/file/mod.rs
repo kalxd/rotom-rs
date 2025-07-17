@@ -1,5 +1,11 @@
 use std::{fs, io::Write};
 
+use crate::data::{
+	AppState, User,
+	error::{Error, Result},
+	file as filedata,
+	ty::FileExtension,
+};
 use futures::StreamExt;
 use ntex::web::{
 	DefaultError, Scope, get, post, scope,
@@ -10,12 +16,7 @@ use ntex_multipart::Multipart;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
-use crate::data::{
-	AppState, User,
-	error::{Error, Result},
-	file,
-	ty::FileExtension,
-};
+pub mod file;
 
 fn guard_file_type(ext: &str) -> Result<FileExtension> {
 	match ext {
@@ -51,7 +52,7 @@ async fn save_file(mut body: Multipart) -> Result<SaveFile> {
 
 	let file_hash = hasher.finalize();
 	let filename = format!("{:x}", file_hash);
-	let filepath = file::with_filename(&filename, &file_type);
+	let filepath = filedata::with_filename(&filename, &file_type);
 
 	let mut f = fs::File::create(filepath)?;
 	f.write_all(&file_content)?;
@@ -94,18 +95,9 @@ returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
 }
 
 #[get("/view/{id}")]
-async fn view_file(id: Path<String>, state: State<AppState>) -> Result<NamedFile> {
-	let ext = sqlx::query_scalar!(
-		r#"
-select 扩展名 as "extension!: FileExtension" from 文件
-where 特征 = $1
-"#,
-		*id
-	)
-	.fetch_optional(&state.db)
-	.await?
-	.ok_or(Error::not_found("文件不存在！"))?;
-	let filepath = file::with_filename(&id, &ext);
+async fn view_file(id: Path<String>, state: file::FileState) -> Result<NamedFile> {
+	let ext = state.get_file_by_sha_just(&id).await?;
+	let filepath = filedata::with_filename(&id, &ext);
 	Ok(NamedFile::open(filepath)?)
 }
 
