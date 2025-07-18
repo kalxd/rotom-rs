@@ -26,6 +26,68 @@ impl AppState {
 	}
 }
 
+impl<'p> sqlx::Executor<'p> for &AppState {
+	type Database = sqlx::Postgres;
+
+	fn fetch_many<'e, 'q: 'e, E>(
+		self,
+		query: E,
+	) -> futures::stream::BoxStream<
+		'e,
+		Result<
+			sqlx::Either<
+				<Self::Database as sqlx::Database>::QueryResult,
+				<Self::Database as sqlx::Database>::Row,
+			>,
+			sqlx::Error,
+		>,
+	>
+	where
+		'p: 'e,
+		E: 'q + sqlx::Execute<'q, Self::Database>,
+	{
+		self.db.fetch_many(query)
+	}
+
+	fn fetch_optional<'e, 'q: 'e, E>(
+		self,
+		query: E,
+	) -> futures::future::BoxFuture<
+		'e,
+		Result<Option<<Self::Database as sqlx::Database>::Row>, sqlx::Error>,
+	>
+	where
+		'p: 'e,
+		E: 'q + sqlx::Execute<'q, Self::Database>,
+	{
+		self.db.fetch_optional(query)
+	}
+
+	fn prepare_with<'e, 'q: 'e>(
+		self,
+		sql: &'q str,
+		parameters: &'e [<Self::Database as sqlx::Database>::TypeInfo],
+	) -> futures::future::BoxFuture<
+		'e,
+		Result<<Self::Database as sqlx::Database>::Statement<'q>, sqlx::Error>,
+	>
+	where
+		'p: 'e,
+	{
+		self.db.prepare_with(sql, parameters)
+	}
+
+	fn describe<'e, 'q: 'e>(
+		self,
+		sql: &'q str,
+	) -> futures::future::BoxFuture<'e, Result<sqlx::Describe<Self::Database>, sqlx::Error>>
+	where
+		'p: 'e,
+	{
+		self.db.describe(sql)
+	}
+}
+
 #[derive(Debug, Serialize, sqlx::FromRow)]
 pub struct User {
 	pub id: i32,
