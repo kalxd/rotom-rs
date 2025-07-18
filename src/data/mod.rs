@@ -123,7 +123,7 @@ where s.令牌 = $1
 "#,
 			uuid as ty::Uuid
 		)
-		.fetch_optional(&state.db)
+		.fetch_optional(state)
 		.await?;
 
 		user.ok_or(error::Error::not_auth("用户不存在！"))
