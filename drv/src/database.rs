@@ -4,7 +4,7 @@ use syn::{
 	Attribute, Data, DeriveInput, Fields, FieldsNamed, FieldsUnnamed, Ident, parse_macro_input,
 };
 
-fn is_has_state_attr(attrs: &[Attribute]) -> bool {
+fn is_has_database_attr(attrs: &[Attribute]) -> bool {
 	attrs.iter().any(|Attribute { meta, .. }| {
 		meta.require_path_only()
 			.map(|p| {
@@ -16,9 +16,9 @@ fn is_has_state_attr(attrs: &[Attribute]) -> bool {
 	})
 }
 
-fn get_state_in_named_field(data: FieldsNamed) -> Option<TokenStream> {
+fn get_database_in_named_field(data: FieldsNamed) -> Option<TokenStream> {
 	data.named.iter().find_map(|f| {
-		if is_has_state_attr(&f.attrs) {
+		if is_has_database_attr(&f.attrs) {
 			let field_name = &f.ident;
 			Some(quote! { #field_name })
 		} else {
@@ -27,9 +27,9 @@ fn get_state_in_named_field(data: FieldsNamed) -> Option<TokenStream> {
 	})
 }
 
-fn get_state_in_uname_field(data: FieldsUnnamed) -> Option<TokenStream> {
+fn get_database_in_uname_field(data: FieldsUnnamed) -> Option<TokenStream> {
 	data.unnamed.iter().enumerate().find_map(|(idx, f)| {
-		if is_has_state_attr(&f.attrs) {
+		if is_has_database_attr(&f.attrs) {
 			let raw_token: proc_macro::TokenStream = idx.to_string().parse().unwrap();
 			let token = TokenStream::from(raw_token);
 			Some(token)
@@ -39,14 +39,14 @@ fn get_state_in_uname_field(data: FieldsUnnamed) -> Option<TokenStream> {
 	})
 }
 
-fn get_state_field(data: Data) -> Option<TokenStream> {
+fn get_database_field(data: Data) -> Option<TokenStream> {
 	match data {
 		Data::Struct(f) => match f.fields {
-			Fields::Named(ns) => get_state_in_named_field(ns),
-			Fields::Unnamed(us) => get_state_in_uname_field(us),
-			_ => panic!("state不允许unit成员！"),
+			Fields::Named(ns) => get_database_in_named_field(ns),
+			Fields::Unnamed(us) => get_database_in_uname_field(us),
+			_ => panic!("Database不允许unit成员！"),
 		},
-		_ => panic!("state仅支持struct定义的数据结构！"),
+		_ => panic!("Database仅支持struct定义的数据结构！"),
 	}
 }
 
@@ -54,9 +54,10 @@ pub fn database_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 	let input = parse_macro_input!(input as DeriveInput);
 
 	let data_name = input.ident;
-	let field_name = get_state_field(input.data).expect("未找到#[database]标识！");
+	let field_name = get_database_field(input.data).expect("未找到#[database]标识！");
 
 	let ast = quote! {
+		#[automatically_derived]
 		impl<'p> sqlx::Executor<'p> for &#data_name {
 			type Database = sqlx::Postgres;
 
