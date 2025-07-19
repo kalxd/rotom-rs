@@ -2,6 +2,7 @@ use ntex::web;
 
 mod data;
 mod handler;
+mod helper;
 
 use data::{AppState, config::load_config, error::Result};
 

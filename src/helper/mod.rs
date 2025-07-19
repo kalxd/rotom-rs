@@ -4,8 +4,8 @@ use crate::data::{
 	ty::FileExtension,
 };
 
-#[derive(drv::State)]
-pub struct FileState(AppState);
+#[derive(Debug, drv::State, drv::Database)]
+pub struct FileState(#[database] AppState);
 
 impl FileState {
 	pub async fn get_file_by_sha(&self, sha: &str) -> Result<Option<FileExtension>> {
@@ -16,7 +16,7 @@ where 特征 = $1
 "#,
 			sha
 		)
-		.fetch_optional(&self.0.db)
+		.fetch_optional(self)
 		.await?;
 
 		Ok(ext)

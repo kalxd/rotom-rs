@@ -16,7 +16,7 @@ use ntex_multipart::Multipart;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
-pub mod file;
+use crate::helper;
 
 fn guard_file_type(ext: &str) -> Result<FileExtension> {
 	match ext {
@@ -95,7 +95,7 @@ returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
 }
 
 #[get("/view/{id}")]
-async fn view_file(id: Path<String>, state: file::FileState) -> Result<NamedFile> {
+async fn view_file(id: Path<String>, state: helper::FileState) -> Result<NamedFile> {
 	let ext = state.get_file_by_sha_just(&id).await?;
 	let filepath = filedata::with_filename(&id, &ext);
 	Ok(NamedFile::open(filepath)?)
