@@ -21,6 +21,7 @@ select
 cat.编号 as id, cat.名称 as name
 from 分类 as cat
 where 用户编号 = $1
+order by id desc
 "#,
 		user.id
 	)
