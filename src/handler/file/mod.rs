@@ -95,8 +95,8 @@ returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
 }
 
 #[get("/view/{id}")]
-async fn view_file(id: Path<String>, state: helper::FileState) -> Result<NamedFile> {
-	let ext = state.get_file_by_sha_just(&id).await?;
+async fn view_file(id: Path<String>, state: helper::file::FileState) -> Result<NamedFile> {
+	let ext = state.check_file_by_sha(&id).await?;
 	let filepath = filedata::with_filename(&id, &ext);
 	Ok(NamedFile::open(filepath)?)
 }
