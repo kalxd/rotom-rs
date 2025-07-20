@@ -4,6 +4,7 @@ COPY .sqlx .sqlx
 COPY Cargo.toml .
 COPY Cargo.lock .
 COPY src src
+COPY drv drv
 
 RUN cargo build --release
 
