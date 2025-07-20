@@ -1,3 +1,5 @@
+pub mod cat;
+
 use crate::data::{
 	AppState,
 	error::{Error, Result},

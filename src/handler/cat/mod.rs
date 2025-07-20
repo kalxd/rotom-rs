@@ -2,20 +2,15 @@ use ntex::web::{
 	DefaultError, Scope, get, post, scope,
 	types::{Json, State},
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::data::{AppState, User, error::Result, ty::UpdateBody};
-
-#[derive(Debug, sqlx::FromRow, Serialize)]
-struct Cat {
-	id: i32,
-	name: String,
-}
+use crate::helper::cat;
 
 #[get("/list")]
-async fn get_all_cat(user: User, state: State<AppState>) -> Result<Json<Vec<Cat>>> {
+async fn get_all_cat(user: User, state: State<AppState>) -> Result<Json<Vec<cat::Cat>>> {
 	let cats = sqlx::query_as!(
-		Cat,
+		cat::Cat,
 		r#"
 select
 cat.编号 as id, cat.名称 as name
@@ -41,9 +36,9 @@ async fn create_cat(
 	body: Json<CreateCatBody>,
 	user: User,
 	state: State<AppState>,
-) -> Result<Json<Cat>> {
+) -> Result<Json<cat::Cat>> {
 	let cat = sqlx::query_as!(
-		Cat,
+		cat::Cat,
 		r#"
 insert into 分类
 (用户编号, 名称)
@@ -69,9 +64,9 @@ async fn update_cat(
 	body: Json<UpdateBody<UpdateCatBody>>,
 	user: User,
 	state: State<AppState>,
-) -> Result<Json<Option<Cat>>> {
+) -> Result<Json<Option<cat::Cat>>> {
 	let cat = sqlx::query_as!(
-		Cat,
+		cat::Cat,
 		r#"
 update 分类
 set 名称 = $1
