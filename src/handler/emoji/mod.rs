@@ -1,4 +1,4 @@
-use ntex::web::{DefaultError, Scope, post, scope, types::Json};
+use ntex::web::{DefaultError, Scope, delete, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
@@ -85,6 +85,30 @@ returning 编号 as id, 分类编号 as cat_id, 文件编号 as file_id, 描述 
 	Ok(Json(emoji))
 }
 
+#[derive(Deserialize)]
+struct DeleteBody {
+	id: i32,
+}
+
+#[delete("/delete")]
+async fn remove_emoji(user: User, body: Json<DeleteBody>, state: EmojiState) -> Result<Json<()>> {
+	sqlx::query_scalar!(
+		r#"
+delete from 表情
+using 分类
+where 表情.编号 = $1 and 分类.用户编号 = $2 and 表情.分类编号 = 分类.编号
+"#,
+		&user.id,
+		&body.id
+	)
+	.fetch_optional(&state)
+	.await?;
+
+	Ok(Json(()))
+}
+
 pub fn api() -> Scope<DefaultError> {
 	scope("/user/emoji")
+		.service(create_emoji)
+		.service(remove_emoji)
 }
