@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\ncat.编号 as id, cat.名称 as name\nfrom 分类 as cat\nwhere 用户编号 = $1\norder by id desc\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "25e037c3b66858b932c22c9dafaec3d4e7f877eff082a9643b08da301ee38164"
+}

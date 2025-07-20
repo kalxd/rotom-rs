@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into 表情\n(分类编号, 文件编号, 描述)\nvalues ($1, $2, $3)\nreturning 编号 as id, 分类编号 as cat_id, 文件编号 as file_id, 描述 as desc\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "cat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "file_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "desc",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "a983d368b139047c74e644721e1a64324d99e056d967d81f208c7989c418c1ee"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\nselect\ncat.编号 as id, cat.名称 as name\nfrom 分类 as cat\nwhere 用户编号 = $1\n",
+  "query": "\nselect 编号 as id, 名称 as name\nfrom 分类\nwhere 编号 = $1 and 用户编号 = $2\n",
   "describe": {
     "columns": [
       {
@@ -16,6 +16,7 @@
     ],
     "parameters": {
       "Left": [
+        "Int4",
         "Int4"
       ]
     },
@@ -24,5 +25,5 @@
       false
     ]
   },
-  "hash": "fc9c1526da12c10caa829a7c3b96939e4f18720604013ae27a3724cb6009413a"
+  "hash": "b774259ce835facc1fd6b9f1aba33abdf1fab24ba00f3ab3a8de3fcbfcdf534c"
 }
