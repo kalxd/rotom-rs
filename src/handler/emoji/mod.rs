@@ -2,7 +2,7 @@ use ntex::web::{DefaultError, Scope, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
-	AppState, User,
+	User,
 	error::{Error, Result},
 };
 use crate::helper;
@@ -15,8 +15,11 @@ struct CreateBody {
 	desc: Option<String>,
 }
 
-#[derive(Debug, drv::State, drv::Database)]
-struct EmojiState(#[database] AppState);
+#[derive(Debug, Clone, drv::State, drv::Database)]
+struct EmojiState {
+	#[database]
+	file: helper::file::FileState,
+}
 
 impl EmojiState {
 	async fn get_user_cat(&self, user_id: &i32, cat_id: &i32) -> Result<Option<helper::cat::Cat>> {
@@ -58,6 +61,8 @@ async fn create_emoji(
 	body: Json<CreateBody>,
 	state: EmojiState,
 ) -> Result<Json<Emoji>> {
+	state.file.check_file_by_sha(&body.file_id).await?;
+
 	if let Some(ref cat_id) = body.cat_id {
 		state.check_user_cat(&user.id, cat_id).await?;
 	}

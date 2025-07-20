@@ -4,7 +4,7 @@ use crate::data::{
 	ty::FileExtension,
 };
 
-#[derive(Debug, drv::State, drv::Database)]
+#[derive(Debug, Clone, drv::State, drv::Database)]
 pub struct FileState(#[database] AppState);
 
 impl FileState {
