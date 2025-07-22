@@ -10,7 +10,7 @@ use crate::helper;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct CreateBody {
-	file_id: String,
+	file_sha: String,
 	cat_id: Option<i32>,
 	desc: Option<String>,
 }
@@ -61,7 +61,7 @@ async fn create_emoji(
 	body: Json<CreateBody>,
 	state: EmojiState,
 ) -> Result<Json<Emoji>> {
-	state.file.check_file_by_sha(&body.file_id).await?;
+	state.file.check_file_by_sha(&body.file_sha).await?;
 
 	if let Some(ref cat_id) = body.cat_id {
 		state.check_user_cat(&user.id, cat_id).await?;
@@ -71,12 +71,13 @@ async fn create_emoji(
 		Emoji,
 		r#"
 insert into 表情
-(分类编号, 文件特征, 描述)
-values ($1, $2, $3)
+(用户编号, 分类编号, 文件特征, 描述)
+values ($1, $2, $3, $4)
 returning 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述 as desc
 "#,
+		&user.id,
 		body.cat_id,
-		body.file_id,
+		body.file_sha,
 		body.desc,
 	)
 	.fetch_one(&state)
@@ -119,7 +120,7 @@ where 表情.编号 = $1 and 分类.用户编号 = $2 and 表情.分类编号 = 
 }
 
 pub fn api() -> Scope<DefaultError> {
-	scope("/user/emoji")
+	scope("/self/emoji")
 		.service(create_emoji)
 		.service(list_emoji)
 		.service(remove_emoji)
