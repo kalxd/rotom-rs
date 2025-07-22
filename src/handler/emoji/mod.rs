@@ -1,4 +1,4 @@
-use ntex::web::{DefaultError, Scope, delete, post, scope, types::Json};
+use ntex::web::{DefaultError, Scope, delete, get, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
@@ -51,7 +51,7 @@ where 编号 = $1 and 用户编号 = $2
 struct Emoji {
 	id: i32,
 	cat_id: Option<i32>,
-	file_id: String,
+	file_sha: String,
 	desc: Option<String>,
 }
 
@@ -71,9 +71,9 @@ async fn create_emoji(
 		Emoji,
 		r#"
 insert into 表情
-(分类编号, 文件编号, 描述)
+(分类编号, 文件特征, 描述)
 values ($1, $2, $3)
-returning 编号 as id, 分类编号 as cat_id, 文件编号 as file_id, 描述 as desc
+returning 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述 as desc
 "#,
 		body.cat_id,
 		body.file_id,
@@ -83,6 +83,17 @@ returning 编号 as id, 分类编号 as cat_id, 文件编号 as file_id, 描述 
 	.await?;
 
 	Ok(Json(emoji))
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ListBody {
+	cat_id: Option<i32>,
+}
+
+#[post("/list")]
+async fn list_emoji(user: User, body: Json<ListBody>, state: EmojiState) -> Result<Json<()>> {
+	todo!()
 }
 
 #[derive(Deserialize)]
@@ -110,5 +121,6 @@ where 表情.编号 = $1 and 分类.用户编号 = $2 and 表情.分类编号 = 
 pub fn api() -> Scope<DefaultError> {
 	scope("/user/emoji")
 		.service(create_emoji)
+		.service(list_emoji)
 		.service(remove_emoji)
 }

@@ -82,7 +82,7 @@ insert into 文件
 (特征, 扩展名)
 values ($1, $2)
 on conflict (特征) do update
-set 创建日期 = now()
+set 更新日期 = now()
 returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
 "#,
 		local_file.sha,
