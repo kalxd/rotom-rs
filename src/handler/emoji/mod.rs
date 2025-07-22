@@ -93,8 +93,25 @@ struct ListBody {
 }
 
 #[post("/list")]
-async fn list_emoji(user: User, body: Json<ListBody>, state: EmojiState) -> Result<Json<()>> {
-	todo!()
+async fn list_emoji(
+	user: User,
+	body: Json<ListBody>,
+	state: EmojiState,
+) -> Result<Json<Vec<Emoji>>> {
+	let cats = sqlx::query_as!(
+		Emoji,
+		r#"
+select 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述 as desc
+from 表情
+where 用户编号 = $1 and 分类编号 is not distinct from $2
+order by 编号 desc"#,
+		&user.id,
+		body.cat_id
+	)
+	.fetch_all(&state)
+	.await?;
+
+	Ok(Json(cats))
 }
 
 #[derive(Deserialize)]
