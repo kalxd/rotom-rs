@@ -1,4 +1,4 @@
-use ntex::web::{DefaultError, Scope, delete, get, post, scope, types::Json};
+use ntex::web::{DefaultError, Scope, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
@@ -102,7 +102,7 @@ struct DeleteBody {
 	id: i32,
 }
 
-#[delete("/delete")]
+#[post("/delete")]
 async fn remove_emoji(user: User, body: Json<DeleteBody>, state: EmojiState) -> Result<Json<()>> {
 	sqlx::query_scalar!(
 		r#"
