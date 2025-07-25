@@ -66,7 +66,6 @@ async fn save_file(mut body: Multipart) -> Result<SaveFile> {
 
 #[derive(Debug, Serialize, sqlx::FromRow)]
 struct File {
-	id: i32,
 	sha: String,
 	extension: FileExtension,
 }
@@ -83,7 +82,7 @@ insert into 文件
 values ($1, $2)
 on conflict (特征) do update
 set 更新日期 = now()
-returning 编号 as id, 特征 as sha, 扩展名 as "extension: FileExtension";
+returning 特征 as sha, 扩展名 as "extension: FileExtension";
 "#,
 		local_file.sha,
 		local_file.ext as FileExtension
