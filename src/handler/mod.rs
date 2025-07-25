@@ -13,7 +13,7 @@ use crate::data::{
 mod cat;
 mod emoji;
 mod file;
-mod user;
+mod myself;
 
 #[derive(Debug, Serialize)]
 struct SessionUser {
@@ -64,7 +64,7 @@ returning 令牌 as "token!: Uuid"
 pub fn api() -> Scope<DefaultError> {
 	scope("/")
 		.service(login)
-		.service(user::api())
+		.service(myself::api())
 		.service(cat::api())
 		.service(file::api())
 		.service(emoji::api())
