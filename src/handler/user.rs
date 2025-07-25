@@ -1,66 +1,12 @@
-use ntex::web::{
-	DefaultError, Scope, get, post, scope,
-	types::{Json, State},
-};
-use serde::{Deserialize, Serialize};
+use ntex::web::{DefaultError, Scope, get, scope, types::Json};
 
-use crate::data::{
-	AppState, User,
-	error::{self, Result},
-	ty::{SaltPassword, Uuid},
-};
-
-#[derive(Debug, Serialize)]
-struct SessionUser {
-	token: Uuid,
-	user: User,
-}
-
-#[derive(Debug, Deserialize)]
-struct LoginBody {
-	username: String,
-	password: String,
-}
+use crate::data::{User, error::Result};
 
 #[get("/self")]
 async fn self_info(user: Option<User>) -> Result<Json<Option<User>>> {
 	Ok(Json(user))
 }
 
-#[post("/login")]
-async fn login(body: Json<LoginBody>, state: State<AppState>) -> Result<Json<SessionUser>> {
-	let salt = SaltPassword::new(&body.password, &state.salt);
-
-	let user = sqlx::query_as!(
-		User,
-		r#"
-select
-编号 as id, 用户名 as username
-from 用户
-where 用户名 = $1 and 密码 = md5($2)
-"#,
-		&body.username,
-		&salt as &SaltPassword
-	)
-	.fetch_optional(&state.db)
-	.await?
-	.ok_or(error::Error::not_auth("用户名或密码不正确！"))?;
-
-	let token = sqlx::query_scalar!(
-		r#"
-insert into
-用户会话 (用户编号)
-values ($1)
-returning 令牌 as "token!: Uuid"
-"#,
-		user.id
-	)
-	.fetch_one(&state.db)
-	.await?;
-
-	Ok(Json(SessionUser { token, user }))
-}
-
 pub fn api() -> Scope<DefaultError> {
-	scope("/user").service(self_info).service(login)
+	scope("/user").service(self_info)
 }
