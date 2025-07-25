@@ -1,8 +1,9 @@
-FROM 192.168.31.10:5000/rotom-rs:base-0.0.1 AS builder
+FROM 192.168.31.10:5000/rotom-rs:base-0.0.3 AS builder
 
 COPY .sqlx .sqlx
 COPY Cargo.toml .
 COPY Cargo.lock .
+COPY drv drv
 COPY src src
 
 RUN cargo build --release
