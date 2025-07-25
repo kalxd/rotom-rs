@@ -137,7 +137,7 @@ where 表情.编号 = $1 and 分类.用户编号 = $2 and 表情.分类编号 = 
 }
 
 pub fn api() -> Scope<DefaultError> {
-	scope("/self/emoji")
+	scope("/emoji")
 		.service(create_emoji)
 		.service(list_emoji)
 		.service(remove_emoji)

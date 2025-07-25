@@ -84,7 +84,7 @@ returning 编号 as id, 名称 as name
 }
 
 pub fn api() -> Scope<DefaultError> {
-	scope("/self/cat")
+	scope("/cat")
 		.service(get_all_cat)
 		.service(create_cat)
 		.service(update_cat)

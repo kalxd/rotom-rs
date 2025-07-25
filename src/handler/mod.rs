@@ -10,8 +10,6 @@ use crate::data::{
 	ty::{SaltPassword, Uuid},
 };
 
-mod cat;
-mod emoji;
 mod file;
 mod myself;
 
@@ -65,7 +63,5 @@ pub fn api() -> Scope<DefaultError> {
 	scope("/")
 		.service(login)
 		.service(myself::api())
-		.service(cat::api())
 		.service(file::api())
-		.service(emoji::api())
 }
