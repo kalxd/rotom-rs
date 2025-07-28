@@ -30,8 +30,8 @@ select 编号 as id, 名称 as name
 from 分类
 where 编号 = $1 and 用户编号 = $2
 "#,
-			user_id,
-			cat_id
+			cat_id,
+			user_id
 		)
 		.fetch_optional(self)
 		.await?;
