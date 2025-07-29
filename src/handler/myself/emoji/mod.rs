@@ -90,6 +90,9 @@ returning 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述
 #[serde(rename_all = "camelCase")]
 struct ListBody {
 	cat_id: Option<i32>,
+	search_word: Option<String>,
+	#[serde(default)]
+	is_exact: bool,
 }
 
 #[post("/list")]
@@ -98,20 +101,35 @@ async fn list_emoji(
 	body: Json<ListBody>,
 	state: EmojiState,
 ) -> Result<Json<Vec<Emoji>>> {
-	let cats = sqlx::query_as!(
-		Emoji,
+	let mut qb = sqlx::QueryBuilder::<sqlx::Postgres>::new(
 		r#"
 select 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述 as desc
 from 表情
-where 用户编号 = $1 and 分类编号 is not distinct from $2
-order by 编号 desc"#,
-		&user.id,
-		body.cat_id
-	)
-	.fetch_all(&state)
-	.await?;
+where"#,
+	);
 
-	Ok(Json(cats))
+	qb.push(" 用户编号 = ");
+	qb.push_bind(&user.id);
+
+	qb.push(" and 分类编号 is not distinct from ");
+	qb.push_bind(&body.cat_id);
+
+	if let Some(search_word) = &body.search_word {
+		if body.is_exact {
+			qb.push(" and to_tsvector('china', 描述) @@ to_tsquery('china', ");
+			qb.push_bind(search_word);
+			qb.push(")");
+		} else {
+			qb.push(" and 描述 like ");
+			qb.push_bind(format!("%{}%", search_word));
+		}
+	}
+
+	qb.push(" order by 编号 desc");
+
+	let emojis = qb.build_query_as::<Emoji>().fetch_all(&state).await?;
+
+	Ok(Json(emojis))
 }
 
 #[derive(Deserialize)]
