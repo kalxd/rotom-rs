@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::data::{
 	User,
 	error::{Error, Result},
+	ty::UpdateBody,
 };
 use crate::helper;
 
@@ -125,6 +126,43 @@ where"#,
 	Ok(Json(emojis))
 }
 
+#[derive(Debug, Deserialize)]
+struct UpdateDescBody {
+	desc: String,
+}
+
+#[post("/update/desc")]
+async fn update_emoji_desc(
+	user: User,
+	body: Json<UpdateBody<UpdateDescBody>>,
+	state: EmojiState,
+) -> Result<Json<Emoji>> {
+	sqlx::query_scalar!(
+		r#"select 1 from 表情 where 编号 = $1 and 用户编号 = $2 limit 1"#,
+		&body.id,
+		&user.id
+	)
+	.fetch_optional(&state)
+	.await?
+	.ok_or(Error::not_found("表情不存在！"))?;
+
+	let emoji = sqlx::query_as!(
+		Emoji,
+		r#"
+update 表情
+set 描述 = $1
+where 编号 = $2
+returning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha
+"#,
+		&body.data.desc,
+		&body.id
+	)
+	.fetch_one(&state)
+	.await?;
+
+	Ok(Json(emoji))
+}
+
 #[derive(Deserialize)]
 struct DeleteBody {
 	id: i32,
@@ -151,5 +189,6 @@ pub fn api() -> Scope<DefaultError> {
 	scope("/emoji")
 		.service(create_emoji)
 		.service(list_emoji)
+		.service(update_emoji_desc)
 		.service(remove_emoji)
 }
