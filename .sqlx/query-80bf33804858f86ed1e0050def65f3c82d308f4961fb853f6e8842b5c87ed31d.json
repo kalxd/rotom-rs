@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate 表情\nset 描述 = $1\nwhere 编号 = $2\nreturning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "desc",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "cat_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "file_sha",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "80bf33804858f86ed1e0050def65f3c82d308f4961fb853f6e8842b5c87ed31d"
+}
