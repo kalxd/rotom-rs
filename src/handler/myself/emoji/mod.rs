@@ -173,11 +173,10 @@ async fn remove_emoji(user: User, body: Json<DeleteBody>, state: EmojiState) -> 
 	sqlx::query_scalar!(
 		r#"
 delete from 表情
-using 分类
-where 表情.编号 = $1 and 分类.用户编号 = $2 and 表情.分类编号 = 分类.编号
+where 表情.编号 = $1 and 用户编号 = $2
 "#,
+		&body.id,
 		&user.id,
-		&body.id
 	)
 	.fetch_optional(&state)
 	.await?;
