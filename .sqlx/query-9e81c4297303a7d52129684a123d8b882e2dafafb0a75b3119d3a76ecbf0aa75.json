@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from 表情\nwhere 表情.编号 = $1 and 用户编号 = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9e81c4297303a7d52129684a123d8b882e2dafafb0a75b3119d3a76ecbf0aa75"
+}
