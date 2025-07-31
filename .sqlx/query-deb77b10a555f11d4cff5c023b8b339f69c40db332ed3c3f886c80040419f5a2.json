@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\nupdate 表情\nset 描述 = $1\nwhere 编号 = $2\nreturning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha\n",
+  "query": "\nupdate 表情\nset 描述 = $2, 分类编号 = $3\nwhere 编号 = $1\nreturning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha\n",
   "describe": {
     "columns": [
       {
@@ -26,6 +26,7 @@
     ],
     "parameters": {
       "Left": [
+        "Int4",
         "Text",
         "Int4"
       ]
@@ -37,5 +38,5 @@
       false
     ]
   },
-  "hash": "80bf33804858f86ed1e0050def65f3c82d308f4961fb853f6e8842b5c87ed31d"
+  "hash": "deb77b10a555f11d4cff5c023b8b339f69c40db332ed3c3f886c80040419f5a2"
 }
