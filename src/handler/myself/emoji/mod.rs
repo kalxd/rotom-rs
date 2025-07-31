@@ -127,12 +127,14 @@ where"#,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct UpdateDescBody {
+	cat_id: Option<i32>,
 	desc: String,
 }
 
-#[post("/update/desc")]
-async fn update_emoji_desc(
+#[post("/update")]
+async fn update_emoji(
 	user: User,
 	body: Json<UpdateBody<UpdateDescBody>>,
 	state: EmojiState,
@@ -150,12 +152,13 @@ async fn update_emoji_desc(
 		Emoji,
 		r#"
 update 表情
-set 描述 = $1
-where 编号 = $2
+set 描述 = $2, 分类编号 = $3
+where 编号 = $1
 returning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha
 "#,
+		&body.id,
 		&body.data.desc,
-		&body.id
+		body.data.cat_id.as_ref()
 	)
 	.fetch_one(&state)
 	.await?;
@@ -188,6 +191,6 @@ pub fn api() -> Scope<DefaultError> {
 	scope("/emoji")
 		.service(create_emoji)
 		.service(list_emoji)
-		.service(update_emoji_desc)
+		.service(update_emoji)
 		.service(remove_emoji)
 }
