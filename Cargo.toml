@@ -30,7 +30,7 @@ version = "0.3.31"
 default-features = false
 
 [dependencies.ntex]
-version = "2.13.2"
+version = "2.15.1"
 default-features = false
 features = ["tokio"]
 
