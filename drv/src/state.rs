@@ -29,9 +29,16 @@ fn handle_named_field(field: &FieldsNamed) -> TokenStream {
 
 	let def_ast = field.named.iter().map(|f| {
 		let field_name = f.ident.as_ref().unwrap();
+		let field_type = &f.ty;
 
-		quote! {
-			#field_name: #field_name.clone()
+		if is_app_state_type(&field_type) {
+			quote! {
+				#field_name: #field_name
+			}
+		} else {
+			quote! {
+				#field_name: #field_name.clone()
+			}
 		}
 	});
 
@@ -65,10 +72,17 @@ fn handle_uname_field(field: &FieldsUnnamed) -> TokenStream {
 			}
 		});
 
-	let def_ast = field.unnamed.iter().enumerate().map(|(i, _)| {
+	let def_ast = field.unnamed.iter().enumerate().map(|(i, f)| {
 		let field_name = Ident::new(&format!("state_{i}"), Span::call_site());
-		quote! {
-			#field_name.clone()
+		let field_type = &f.ty;
+		if is_app_state_type(field_type) {
+			quote! {
+				#field_name.clone()
+			}
+		} else {
+			quote! {
+				#field_name
+			}
 		}
 	});
 
