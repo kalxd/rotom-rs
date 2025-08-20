@@ -9,28 +9,16 @@ use crate::helper::cat;
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct CatWithCount {
-	id: i32,
+	id: Option<i32>,
 	name: String,
 	count: i64,
 }
 
 #[get("/list")]
 async fn get_all_cat(user: User, state: State<AppState>) -> Result<Json<Vec<CatWithCount>>> {
-	let cats = sqlx::query_as!(
-		CatWithCount,
-		r#"
-select
-cat.编号 as id, cat.名称 as name, t.count as "count!"
-from
-分类 as cat,
-lateral (select count(编号) as count from 表情 where 表情.分类编号 = cat.编号) as t
-where 用户编号 = $1
-order by id desc
-"#,
-		user.id
-	)
-	.fetch_all(&state.db)
-	.await?;
+	let cats = sqlx::query_file_as!(CatWithCount, "sql/cat/get_all_cat.sql", &user.id)
+		.fetch_all(&state.db)
+		.await?;
 
 	Ok(Json(cats))
 }
