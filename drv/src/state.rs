@@ -18,7 +18,9 @@ fn handle_named_field(field: &FieldsNamed) -> TokenStream {
 
 			if is_app_state_type(&field_type) {
 				quote! {
-					let #field_name = req.app_state::<#field_type>().ok_or(Self::Error::NotConfigured)?;
+					let #field_name = req.app_state::<#field_type>()
+                    .ok_or(Self::Error::Internal("无法正确获取state！".into()))?
+                    .clone();
 				}
 			} else {
 				quote! {
@@ -29,16 +31,9 @@ fn handle_named_field(field: &FieldsNamed) -> TokenStream {
 
 	let def_ast = field.named.iter().map(|f| {
 		let field_name = f.ident.as_ref().unwrap();
-		let field_type = &f.ty;
 
-		if is_app_state_type(&field_type) {
-			quote! {
-				#field_name: #field_name
-			}
-		} else {
-			quote! {
-				#field_name: #field_name.clone()
-			}
+		quote! {
+			#field_name: #field_name
 		}
 	});
 
@@ -62,7 +57,9 @@ fn handle_uname_field(field: &FieldsUnnamed) -> TokenStream {
 
 			if is_app_state_type(field_type) {
 				quote! {
-					let #field_name = req.app_state::<#field_type>().ok_or(Self::Error::NotConfigured)?;
+					let #field_name = req.app_state::<#field_type>()
+                    .ok_or(Self::Error::Internal("无法正确获取state！".into()))?
+                    .clone();
 				}
 			}
 			else {
@@ -72,17 +69,10 @@ fn handle_uname_field(field: &FieldsUnnamed) -> TokenStream {
 			}
 		});
 
-	let def_ast = field.unnamed.iter().enumerate().map(|(i, f)| {
+	let def_ast = field.unnamed.iter().enumerate().map(|(i, _)| {
 		let field_name = Ident::new(&format!("state_{i}"), Span::call_site());
-		let field_type = &f.ty;
-		if is_app_state_type(field_type) {
-			quote! {
-				#field_name.clone()
-			}
-		} else {
-			quote! {
-				#field_name
-			}
+		quote! {
+			#field_name,
 		}
 	});
 
@@ -112,7 +102,7 @@ pub fn state_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let ast = quote! {
 		impl<E: ntex::web::ErrorRenderer> ntex::web::FromRequest<E> for #data_name {
-			type Error = ntex::web::error::StateExtractorError;
+			type Error = crate::data::error::Error;
 
 			async fn from_request(req: &ntex::web::HttpRequest, _payload: &mut ntex::http::Payload) -> Result<Self, Self::Error> {
 				#def
