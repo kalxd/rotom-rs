@@ -2,9 +2,9 @@ use ntex::web::{DefaultError, Scope, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
-	User,
+	AppState, User,
 	error::{Error, Result},
-	ty::UpdateBody,
+	ty::{Pager, UpdateBody},
 };
 use crate::helper;
 
@@ -16,7 +16,7 @@ struct CreateBody {
 	desc: Option<String>,
 }
 
-#[derive(Debug, Clone, drv::State, drv::Database)]
+#[derive(Debug, drv::State, drv::Database)]
 struct EmojiState {
 	#[database]
 	file: helper::file::FileState,
@@ -94,36 +94,76 @@ struct ListBody {
 	search_word: Option<String>,
 }
 
-#[post("/list")]
-async fn list_emoji(
+#[derive(Debug, drv::State, drv::Database)]
+struct ListEmojiState {
 	user: User,
-	body: Json<ListBody>,
-	state: EmojiState,
-) -> Result<Json<Vec<Emoji>>> {
-	let mut qb = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-		r#"
-select 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述 as desc
-from 表情
-where"#,
-	);
+	#[database]
+	state: AppState,
+}
 
-	qb.push(" 用户编号 = ");
-	qb.push_bind(&user.id);
+impl ListEmojiState {
+	fn prepare_sql<'a>(
+		&'a self,
+		qb: &mut sqlx::QueryBuilder<'a, sqlx::Postgres>,
+		args: &'a ListBody,
+	) {
+		qb.push(" from 表情 where");
 
-	qb.push(" and 分类编号 is not distinct from ");
-	qb.push_bind(&body.cat_id);
+		qb.push(" 用户编号 = ");
+		qb.push_bind(&self.user.id);
 
-	if let Some(search_word) = &body.search_word {
-		qb.push(" and to_tsvector('china', 描述) @@ to_tsquery('china', ");
-		qb.push_bind(search_word);
-		qb.push(")");
+		qb.push(" and 分类编号 is not distinct from ");
+		qb.push_bind(args.cat_id);
+
+		if let Some(search_word) = &args.search_word {
+			qb.push(" and to_tsvector('china', 描述) @@ websearch_to_tsquery('china', ");
+			qb.push_bind(search_word);
+			qb.push(")");
+		}
 	}
 
-	qb.push(" order by 编号 desc");
+	async fn run_count(&self, body: &ListBody) -> Result<i64> {
+		let mut qb = sqlx::QueryBuilder::<sqlx::Postgres>::default();
+		qb.push(r#"select count(编号) as count"#);
 
-	let emojis = qb.build_query_as::<Emoji>().fetch_all(&state).await?;
+		self.prepare_sql(&mut qb, &body);
 
-	Ok(Json(emojis))
+		dbg!(qb.sql());
+
+		let c = qb.build_query_scalar::<i64>().fetch_one(self).await?;
+		Ok(c)
+	}
+
+	async fn run_list(&self, body: &ListBody) -> Result<Vec<Emoji>> {
+		let mut qb = sqlx::QueryBuilder::<sqlx::Postgres>::default();
+		qb.push(
+			r#"
+select
+编号 as id,
+分类编号 as cat_id,
+文件特征 as file_sha,
+描述 as desc
+"#,
+		);
+		self.prepare_sql(&mut qb, &body);
+		qb.push(" order by 编号 desc");
+
+		let emojis = qb.build_query_as::<Emoji>().fetch_all(self).await?;
+		Ok(emojis)
+	}
+
+	async fn run(&self, body: Json<ListBody>) -> Result<Json<Pager<Emoji>>> {
+		let (count, emojis) = futures::try_join!(self.run_count(&body), self.run_list(&body))?;
+		Ok(Json(Pager {
+			count,
+			hits: emojis,
+		}))
+	}
+}
+
+#[post("/list")]
+async fn list_emoji(state: ListEmojiState, body: Json<ListBody>) -> Result<Json<Pager<Emoji>>> {
+	state.run(body).await
 }
 
 #[derive(Debug, Deserialize)]

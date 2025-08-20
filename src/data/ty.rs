@@ -69,3 +69,21 @@ pub struct UpdateBody<T> {
 	pub id: i32,
 	pub data: T,
 }
+
+#[derive(Debug, Serialize)]
+pub struct Pager<T> {
+	pub count: i64,
+	pub hits: Vec<T>,
+}
+
+impl<T, TS> From<(i64, TS)> for Pager<T>
+where
+	TS: IntoIterator<Item = T>,
+{
+	fn from((count, hits): (i64, TS)) -> Self {
+		Self {
+			count,
+			hits: Vec::from_iter(hits),
+		}
+	}
+}
