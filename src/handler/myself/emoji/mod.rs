@@ -151,19 +151,15 @@ select
 		let emojis = qb.build_query_as::<Emoji>().fetch_all(self).await?;
 		Ok(emojis)
 	}
-
-	async fn run(&self, body: Json<ListBody>) -> Result<Json<Pager<Emoji>>> {
-		let (count, emojis) = futures::try_join!(self.run_count(&body), self.run_list(&body))?;
-		Ok(Json(Pager {
-			count,
-			hits: emojis,
-		}))
-	}
 }
 
 #[post("/list")]
 async fn list_emoji(state: ListEmojiState, body: Json<ListBody>) -> Result<Json<Pager<Emoji>>> {
-	state.run(body).await
+	let (count, emojis) = futures::try_join!(state.run_count(&body), state.run_list(&body))?;
+	Ok(Json(Pager {
+		count,
+		hits: emojis,
+	}))
 }
 
 #[derive(Debug, Deserialize)]
