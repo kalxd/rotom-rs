@@ -71,12 +71,12 @@ pub struct UpdateBody<T> {
 }
 
 #[derive(Debug, Serialize)]
-pub struct Pager<T> {
+pub struct PagerResult<T> {
 	pub count: i64,
 	pub hits: Vec<T>,
 }
 
-impl<T, TS> From<(i64, TS)> for Pager<T>
+impl<T, TS> From<(i64, TS)> for PagerResult<T>
 where
 	TS: IntoIterator<Item = T>,
 {

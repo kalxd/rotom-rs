@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::data::{
 	AppState, User,
 	error::{Error, Result},
-	ty::{Pager, UpdateBody},
+	ty::{PagerResult, UpdateBody},
 };
 use crate::helper;
 
@@ -154,9 +154,12 @@ select
 }
 
 #[post("/list")]
-async fn list_emoji(state: ListEmojiState, body: Json<ListBody>) -> Result<Json<Pager<Emoji>>> {
+async fn list_emoji(
+	state: ListEmojiState,
+	body: Json<ListBody>,
+) -> Result<Json<PagerResult<Emoji>>> {
 	let (count, emojis) = futures::try_join!(state.run_count(&body), state.run_list(&body))?;
-	Ok(Json(Pager {
+	Ok(Json(PagerResult {
 		count,
 		hits: emojis,
 	}))
