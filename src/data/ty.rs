@@ -34,6 +34,28 @@ impl<'de> Deserialize<'de> for Uuid {
 	}
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct StrI64(i64);
+
+impl TryFrom<&str> for StrI64 {
+	type Error = <i64 as std::str::FromStr>::Err;
+
+	fn try_from(value: &str) -> Result<Self, Self::Error> {
+		value.parse().map(Self)
+	}
+}
+
+impl<'de> serde::Deserialize<'de> for StrI64 {
+	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: serde::Deserializer<'de>,
+	{
+		// deserializer.deserialize_any()
+		todo!()
+	}
+}
+
 #[derive(Debug, sqlx::Type)]
 #[sqlx(transparent)]
 pub struct SaltPassword(String);
@@ -68,6 +90,24 @@ impl std::fmt::Display for FileExtension {
 pub struct UpdateBody<T> {
 	pub id: i32,
 	pub data: T,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Pager {
+	pub page: i64,
+	pub size: i64,
+}
+
+impl Pager {
+	pub fn get_offset(&self) -> i64 {
+		(self.page - 1) * self.size
+	}
+}
+
+impl Default for Pager {
+	fn default() -> Self {
+		Self { page: 1, size: 10 }
+	}
 }
 
 #[derive(Debug, Serialize)]
