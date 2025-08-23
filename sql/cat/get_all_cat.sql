@@ -3,7 +3,7 @@ null as "id",
 '默认分类' as "name!",
 count(编号) as "count!"
 from 表情
-where 分类编号 is null
+where 分类编号 is null and 用户编号 = $1
 union all
 select
 cat.编号 as "id", cat.名称 as "name", t.count as "count!"
