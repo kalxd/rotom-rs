@@ -5,6 +5,7 @@ COPY Cargo.toml .
 COPY Cargo.lock .
 COPY src src
 COPY drv drv
+COPY sql sql
 
 RUN cargo build --release
 
