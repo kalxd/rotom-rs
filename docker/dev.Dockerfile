@@ -1,4 +1,4 @@
-FROM 192.168.31.10:5000/rotom-rs:base-0.0.3 AS builder
+FROM 192.168.31.10:5000/rotom-rs:base-0.0.4 AS builder
 
 COPY .sqlx .sqlx
 COPY Cargo.toml .
@@ -8,7 +8,7 @@ COPY drv drv
 
 RUN cargo build --release
 
-FROM debian:12.11-slim
+FROM debian:trixie-slim
 
 WORKDIR /opt/app
 
