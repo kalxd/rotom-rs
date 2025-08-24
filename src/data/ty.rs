@@ -34,28 +34,6 @@ impl<'de> Deserialize<'de> for Uuid {
 	}
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Ord, sqlx::Type)]
-#[sqlx(transparent)]
-pub struct StrI64(i64);
-
-impl TryFrom<&str> for StrI64 {
-	type Error = <i64 as std::str::FromStr>::Err;
-
-	fn try_from(value: &str) -> Result<Self, Self::Error> {
-		value.parse().map(Self)
-	}
-}
-
-impl<'de> serde::Deserialize<'de> for StrI64 {
-	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-	where
-		D: serde::Deserializer<'de>,
-	{
-		// deserializer.deserialize_any()
-		todo!()
-	}
-}
-
 #[derive(Debug, sqlx::Type)]
 #[sqlx(transparent)]
 pub struct SaltPassword(String);

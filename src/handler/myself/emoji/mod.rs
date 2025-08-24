@@ -1,7 +1,4 @@
-use ntex::web::{
-	DefaultError, Scope, get, post, scope,
-	types::{Json, Query},
-};
+use ntex::web::{DefaultError, Scope, post, scope, types::Json};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
@@ -95,7 +92,7 @@ returning 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述
 struct ListBody {
 	cat_id: Option<i32>,
 	search_word: Option<String>,
-	#[serde(flatten, deserialize_with = "Pager::deserialize")]
+	#[serde(default)]
 	pager: Pager,
 }
 
@@ -133,8 +130,6 @@ impl ListEmojiState {
 
 		self.prepare_sql(&mut qb, &body);
 
-		dbg!(qb.sql());
-
 		let c = qb.build_query_scalar::<i64>().fetch_one(self).await?;
 		Ok(c)
 	}
@@ -163,10 +158,10 @@ select
 	}
 }
 
-#[get("/list")]
+#[post("/list")]
 async fn list_emoji(
 	state: ListEmojiState,
-	body: Query<ListBody>,
+	body: Json<ListBody>,
 ) -> Result<Json<PagerResult<Emoji>>> {
 	let (count, emojis) = futures::try_join!(state.run_count(&body), state.run_list(&body))?;
 	Ok(Json(PagerResult {
