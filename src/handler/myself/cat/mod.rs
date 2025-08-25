@@ -5,7 +5,6 @@ use ntex::web::{
 use serde::{Deserialize, Serialize};
 
 use crate::data::{AppState, User, error::Result, ty::UpdateBody};
-use crate::helper::cat;
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct CatWithCount {
@@ -61,18 +60,13 @@ async fn update_cat(
 	body: Json<UpdateBody<UpdateCatBody>>,
 	user: User,
 	state: State<AppState>,
-) -> Result<Json<Option<cat::Cat>>> {
-	let cat = sqlx::query_as!(
-		cat::Cat,
-		r#"
-update 分类
-set 名称 = $1
-where 编号 = $2 and 用户编号 = $3
-returning 编号 as id, 名称 as name
-"#,
-		body.data.name,
+) -> Result<Json<Option<CatWithCount>>> {
+	let cat = sqlx::query_file_as!(
+		CatWithCount,
+		"sql/cat/update_cat.sql",
+		user.id,
 		body.id,
-		user.id
+		body.data.name
 	)
 	.fetch_optional(&state.db)
 	.await?;
