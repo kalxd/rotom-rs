@@ -33,14 +33,14 @@ async fn create_cat(
 	body: Json<CreateCatBody>,
 	user: User,
 	state: State<AppState>,
-) -> Result<Json<cat::Cat>> {
+) -> Result<Json<CatWithCount>> {
 	let cat = sqlx::query_as!(
-		cat::Cat,
+		CatWithCount,
 		r#"
 insert into 分类
 (用户编号, 名称)
 values ($1, $2)
-returning 编号 as id, 名称 as name
+returning 编号 as id, 名称 as name, 0 as "count!"
 "#,
 		user.id,
 		body.name
