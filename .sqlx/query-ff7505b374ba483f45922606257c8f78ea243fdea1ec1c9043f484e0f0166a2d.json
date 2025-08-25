@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "with iq as (\n    update\n        分类\n    set\n        名称 = $3\n    where\n        用户编号 = $1\n        and 编号 = $2\n    returning\n        *\n)\nselect\n    iq.编号 as \"id\",\n    iq.名称 as \"name\",\n    t.count as \"count!\"\nfrom\n    iq,\n    lateral (\n        select\n            count(1)\n        from\n            表情\n        where\n            iq.编号 = 表情.分类编号) as t;\n\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "count!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Varchar"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "ff7505b374ba483f45922606257c8f78ea243fdea1ec1c9043f484e0f0166a2d"
+}

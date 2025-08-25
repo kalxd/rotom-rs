@@ -10,7 +10,9 @@ with iq as (
         *
 )
 select
-    iq.编号 as "id", iq.名称 as "name", t.count as "count!"
+    iq.编号 as "id",
+    iq.名称 as "name",
+    t.count as "count!"
 from
     iq,
     lateral (
