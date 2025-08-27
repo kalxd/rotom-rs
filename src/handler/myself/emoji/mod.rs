@@ -174,7 +174,7 @@ async fn list_emoji(
 #[serde(rename_all = "camelCase")]
 struct UpdateDescBody {
 	cat_id: Option<i32>,
-	desc: String,
+	desc: Option<String>,
 }
 
 #[post("/update")]
@@ -201,7 +201,7 @@ where 编号 = $1
 returning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as file_sha
 "#,
 		&body.id,
-		&body.data.desc,
+		body.data.desc,
 		body.data.cat_id.as_ref()
 	)
 	.fetch_one(&state)
