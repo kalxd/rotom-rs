@@ -1,4 +1,4 @@
-FROM 192.168.31.10:5000/rust:1.89.0-build-1
+FROM 192.168.31.10:5000/rust:1.92.0-build-1
 
 COPY Cargo.toml .
 COPY Cargo.lock .
