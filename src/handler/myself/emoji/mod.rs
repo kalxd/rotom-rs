@@ -118,9 +118,8 @@ impl ListEmojiState {
 		qb.push_bind(args.cat_id);
 
 		if let Some(search_word) = &args.search_word {
-			qb.push(" and to_tsvector('china', 描述) @@ websearch_to_tsquery('china', ");
-			qb.push_bind(search_word);
-			qb.push(")");
+			qb.push(" and 描述 like ");
+			qb.push_bind(format!("%{}%", search_word));
 		}
 	}
 
