@@ -1,9 +1,3 @@
-create extension if not exists zhparser;
-
-create text search configuration china (parser = zhparser);
-
-ALTER TEXT SEARCH CONFIGURATION china ADD MAPPING FOR n,v,a,i,e,l WITH simple;
-
 create table if not exists "用户" (
 	编号 int primary key generated always as identity,
 	用户名 varchar(64) not null unique,
