@@ -1,12 +1,12 @@
-FROM 192.168.31.10:5000/rotom-rs:base-0.0.5 AS builder
+# FROM 192.168.31.10:5000/rotom-rs:base-0.0.5 AS builder
+FROM base AS builder
 
 COPY .sqlx .sqlx
-COPY Cargo.toml .
-COPY Cargo.lock .
 COPY src src
 COPY drv drv
 COPY sql sql
 
+RUN touch src/main.rs
 RUN cargo build --release
 
 FROM debian:trixie-slim

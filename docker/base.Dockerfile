@@ -6,3 +6,4 @@ COPY drv drv
 
 RUN mkdir -p src
 RUN echo "fn main() {}" > src/main.rs
+RUN cargo build --release
