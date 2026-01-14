@@ -9,7 +9,7 @@ COPY sql sql
 RUN touch src/main.rs
 RUN cargo build --release
 
-FROM debian:trixie-slim
+FROM m.daocloud.io/docker.io/library/debian:trixie-slim
 
 WORKDIR /opt/app
 
