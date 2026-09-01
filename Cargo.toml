@@ -13,11 +13,11 @@ sha2 = "0.10.9"
 drv = { path = "./drv" }
 
 [dependencies.uuid]
-version = "1.16.0"
+version = "1.24.0"
 features = ["v4"]
 
 [dependencies.serde]
-version = "1.0.219"
+version = "1.0.228"
 features = ["derive"]
 
 [dependencies.config]
