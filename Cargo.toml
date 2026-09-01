@@ -21,7 +21,7 @@ version = "1.0.219"
 features = ["derive"]
 
 [dependencies.config]
-version = "0.15.13"
+version = "0.15.25"
 default-features = false
 features = ["toml"]
 
@@ -35,5 +35,5 @@ default-features = false
 features = ["tokio"]
 
 [dependencies.sqlx]
-version = "0.8.6"
+version = "0.9.0"
 features = ["postgres", "runtime-tokio", "uuid"]

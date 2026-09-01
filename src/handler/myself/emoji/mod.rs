@@ -104,11 +104,7 @@ struct ListEmojiState {
 }
 
 impl ListEmojiState {
-	fn prepare_sql<'a>(
-		&'a self,
-		qb: &mut sqlx::QueryBuilder<'a, sqlx::Postgres>,
-		args: &'a ListBody,
-	) {
+	fn prepare_sql<'a>(&'a self, qb: &mut sqlx::QueryBuilder<sqlx::Postgres>, args: &'a ListBody) {
 		qb.push(" from 表情 where");
 
 		qb.push(" 用户编号 = ");
