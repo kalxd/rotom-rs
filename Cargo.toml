@@ -7,21 +7,21 @@ edition = "2024"
 members = ["drv"]
 
 [dependencies]
-ntex-multipart = "2.0.0"
-ntex-files = "2.1.0"
+ntex-multipart = "3.2.0"
+ntex-files = "3.2.0"
 sha2 = "0.10.9"
 drv = { path = "./drv" }
 
 [dependencies.uuid]
-version = "1.16.0"
+version = "1.24.0"
 features = ["v4"]
 
 [dependencies.serde]
-version = "1.0.219"
+version = "1.0.228"
 features = ["derive"]
 
 [dependencies.config]
-version = "0.15.13"
+version = "0.15.25"
 default-features = false
 features = ["toml"]
 
@@ -30,10 +30,10 @@ version = "0.3.31"
 default-features = false
 
 [dependencies.ntex]
-version = "2.17.0"
+version = "3.12.3"
 default-features = false
-features = ["tokio"]
+features = ["tokio", "compress"]
 
 [dependencies.sqlx]
-version = "0.8.6"
+version = "0.9.0"
 features = ["postgres", "runtime-tokio", "uuid"]

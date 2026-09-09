@@ -58,49 +58,43 @@ pub fn database_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 
 	let ast = quote! {
 		#[automatically_derived]
-		impl<'p> sqlx::Executor<'p> for &#data_name {
+		impl<'c> sqlx::Executor<'c> for &#data_name {
 			type Database = sqlx::Postgres;
 
-			fn fetch_many<'e, 'q: 'e, E>(
+			fn fetch_many<'e, 'q, E>(
 				self,
-				query: E
-			) -> futures::stream::BoxStream<'e, Result<sqlx::Either<<Self::Database as sqlx::Database>::QueryResult, <Self::Database as sqlx::Database>::Row> ,sqlx::Error>>
-			where
-				'p: 'e,
-				E: 'q + sqlx::Execute<'q, Self::Database>,
-			{
+				query: E,
+			) -> std::pin::Pin<Box<dyn futures::Stream<Item = Result<sqlx::Either<<Self::Database as sqlx::Database>::QueryResult, <Self::Database as sqlx::Database>::Row>, sqlx::Error>> + Send + 'e>>
+			where 'q: 'e,
+			'c: 'e,
+			E: 'q + sqlx::Execute<'q, Self::Database> {
 				self.#field_name.fetch_many(query)
 			}
 
-			fn fetch_optional<'e, 'q: 'e, E>(
+			fn fetch_optional<'e, 'q, E>(
 				self,
-				query: E
-			) -> futures::future::BoxFuture<'e, Result<Option<<Self::Database as sqlx::Database>::Row>, sqlx::Error>>
-			where
-				'p: 'e,
-				E: 'q + sqlx::Execute<'q, Self::Database>,
-			{
+				query: E,
+			) -> std::pin::Pin<Box<dyn Future<Output = Result<Option<<Self::Database as sqlx::Database>::Row>, sqlx::Error>> + Send + 'e>>
+			where 'q: 'e,
+			'c: 'e,
+			E: 'q + sqlx::Execute<'q, Self::Database> {
 				self.#field_name.fetch_optional(query)
 			}
 
-			fn prepare_with<'e, 'q: 'e>(
+			fn prepare_with<'e>(
 				self,
-				sql: &'q str,
-				parameters: &'e [<Self::Database as sqlx::Database>::TypeInfo]
-			) -> futures::future::BoxFuture<'e, Result<<Self::Database as sqlx::Database>::Statement<'q>, sqlx::Error>>
+				sql: sqlx::SqlStr,
+				parameters: &'e [<Self::Database as sqlx::Database>::TypeInfo],
+			) -> std::pin::Pin<Box<dyn Future<Output = Result<<Self::Database as sqlx::Database>::Statement, sqlx::Error>> + Send + 'e>>
 			where
-				'p: 'e,
-			{
+			'c: 'e {
 				self.#field_name.prepare_with(sql, parameters)
 			}
 
-			fn describe<'e, 'q: 'e>(
+			fn describe<'e>(
 				self,
-				sql: &'q str
-			) -> futures::future::BoxFuture<'e, Result<sqlx::Describe<Self::Database>, sqlx::Error>>
-			where
-				'p: 'e,
-			{
+				sql: sqlx::SqlStr,
+			) -> std::pin::Pin<Box<(dyn futures::Future<Output = Result<sqlx::Describe<<Self as sqlx::Executor<'c>>::Database>, sqlx::Error>> + Send + 'e)>> {
 				self.#field_name.describe(sql)
 			}
 		}

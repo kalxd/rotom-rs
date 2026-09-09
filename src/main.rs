@@ -15,10 +15,12 @@ async fn main() -> Result<()> {
 	let config = load_config()?;
 	let state = AppState::from_config(&config).await?;
 
-	web::HttpServer::new(move || web::App::new().state(state.clone()).service(handler::api()))
-		.bind(("0.0.0.0", 3000))?
-		.run()
-		.await?;
+	web::HttpServer::new(async move || {
+		web::App::new().state(state.clone()).service(handler::api())
+	})
+	.bind(("0.0.0.0", 3000))?
+	.run()
+	.await?;
 
 	Ok(())
 }
