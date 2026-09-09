@@ -18,11 +18,11 @@ use sha2::{Digest, Sha256};
 
 use crate::helper;
 
-fn guard_file_type(ext: &str) -> Result<FileExtension> {
+fn guard_file_type(ext: Option<&str>) -> Result<FileExtension> {
 	match ext {
-		"png" => Ok(FileExtension::Png),
-		"jpeg" | "jpg" => Ok(FileExtension::Jpg),
-		"webp" => Ok(FileExtension::Webp),
+		Some("png") => Ok(FileExtension::Png),
+		Some("jpeg") | Some("jpg") => Ok(FileExtension::Jpg),
+		Some("webp") => Ok(FileExtension::Webp),
 		_ => Err(Error::illegal("无效的文件类型！")),
 	}
 }
@@ -38,8 +38,11 @@ async fn save_file(mut body: Multipart) -> Result<SaveFile> {
 		.await
 		.ok_or(Error::illegal("没有获取到上传文件！"))??;
 
-	let file_type = field.content_type().subtype().to_string();
-	let file_type = guard_file_type(&file_type)?;
+	let file_type = field
+		.content_type()
+		.filter(|t| t.type_().as_ref() == "image")
+		.map(|t| t.subtype().as_str());
+	let file_type = guard_file_type(file_type)?;
 
 	let mut file_content: Vec<u8> = vec![]; // 保存到内存，计算完整的sha才能确定文件名。
 	let mut hasher = Sha256::new();

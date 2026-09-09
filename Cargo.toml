@@ -7,8 +7,8 @@ edition = "2024"
 members = ["drv"]
 
 [dependencies]
-ntex-multipart = "2.0.0"
-ntex-files = "2.1.0"
+ntex-multipart = "3.2.0"
+ntex-files = "3.2.0"
 sha2 = "0.10.9"
 drv = { path = "./drv" }
 
@@ -30,7 +30,7 @@ version = "0.3.31"
 default-features = false
 
 [dependencies.ntex]
-version = "2.18.0"
+version = "3.12.3"
 default-features = false
 features = ["tokio", "compress"]
 
