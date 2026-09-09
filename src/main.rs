@@ -1,10 +1,11 @@
 use ntex::web;
+use ralts::error::Result;
 
 mod data;
 mod handler;
 mod helper;
 
-use data::{AppState, config::load_config, error::Result};
+use data::{AppState, config};
 
 #[ntex::main]
 async fn main() -> Result<()> {
@@ -12,7 +13,7 @@ async fn main() -> Result<()> {
 
 	data::file::ensure_base_dir()?;
 
-	let config = load_config()?;
+	let config = config::Config::load_config()?;
 	let state = AppState::from_config(&config).await?;
 
 	web::HttpServer::new(async move || {

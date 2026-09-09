@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use ntex::web::{ErrorRenderer, FromRequest};
+use ralts::error::{AppError, Result};
 use serde::Serialize;
 use sqlx::PgPool;
 
 pub mod config;
-pub mod error;
 pub mod file;
 pub mod ty;
 
@@ -17,7 +17,7 @@ pub struct AppState {
 }
 
 impl AppState {
-	pub async fn from_config(cfg: &config::Config) -> error::Result<Self> {
+	pub async fn from_config(cfg: &config::Config) -> Result<Self> {
 		let pool = cfg.make_db_connection().await?;
 
 		Ok(Self {
@@ -34,24 +34,24 @@ pub struct User {
 }
 
 impl<E: ErrorRenderer> FromRequest<E> for User {
-	type Error = error::Error;
+	type Error = AppError;
 
 	async fn from_request(
 		req: &ntex::web::HttpRequest,
 		_: &mut ntex::http::Payload,
-	) -> error::Result<Self> {
+	) -> Result<Self> {
 		let token = req
 			.headers()
 			.get("XGToken")
-			.ok_or(error::Error::not_auth("未填写令牌！"))?
+			.ok_or(AppError::no_auth("未填写令牌！"))?
 			.to_str()
-			.map_err(error::Error::not_auth)?;
+			.map_err(AppError::no_auth)?;
 
-		let uuid = ty::Uuid::try_from(token).map_err(error::Error::not_auth)?;
+		let uuid = ty::Uuid::try_from(token).map_err(AppError::no_auth)?;
 
 		let state = req
 			.app_state::<AppState>()
-			.ok_or(error::Error::internal("依赖未成功注入！"))?;
+			.ok_or(AppError::internal("依赖未成功注入！"))?;
 
 		let user = sqlx::query_as!(
 			User,
@@ -65,6 +65,6 @@ where s.令牌 = $1
 		.fetch_optional(state)
 		.await?;
 
-		user.ok_or(error::Error::not_auth("用户不存在！"))
+		user.ok_or(AppError::no_auth("用户不存在！"))
 	}
 }

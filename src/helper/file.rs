@@ -1,8 +1,6 @@
-use crate::data::{
-	AppState,
-	error::{Error, Result},
-	ty::FileExtension,
-};
+use ralts::error::{QuickThrow, Result};
+
+use crate::data::{AppState, ty::FileExtension};
 
 #[derive(Debug, Clone, drv::State, drv::Database)]
 pub struct FileState(#[database] AppState);
@@ -23,8 +21,6 @@ where 特征 = $1
 	}
 
 	pub async fn check_file_by_sha(&self, sha: &str) -> Result<FileExtension> {
-		self.get_file_by_sha(sha)
-			.await?
-			.ok_or(Error::not_found("文件不存在！"))
+		self.get_file_by_sha(sha).await?.not_found("文件不存在！")
 	}
 }

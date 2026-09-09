@@ -1,9 +1,9 @@
 use ntex::web::{DefaultError, Scope, post, scope, types::Json};
+use ralts::error::{QuickThrow, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
 	AppState, User,
-	error::{Error, Result},
 	ty::{Pager, PagerResult, UpdateBody},
 };
 use crate::helper;
@@ -43,7 +43,7 @@ where 编号 = $1 and 用户编号 = $2
 	async fn check_user_cat(&self, user_id: &i32, cat_id: &i32) -> Result<helper::cat::Cat> {
 		self.get_user_cat(user_id, cat_id)
 			.await?
-			.ok_or(Error::illegal("所选分类不存在！"))
+			.forbidden("所选分类不存在！")
 	}
 }
 
@@ -185,7 +185,7 @@ async fn update_emoji(
 	)
 	.fetch_optional(&state)
 	.await?
-	.ok_or(Error::not_found("表情不存在！"))?;
+	.not_found("表情不存在！")?;
 
 	let emoji = sqlx::query_as!(
 		Emoji,

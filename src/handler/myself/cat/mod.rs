@@ -2,9 +2,10 @@ use ntex::web::{
 	DefaultError, Scope, get, post, scope,
 	types::{Json, State},
 };
+use ralts::error::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::data::{AppState, User, error::Result, ty::UpdateBody};
+use crate::data::{AppState, User, ty::UpdateBody};
 
 #[derive(Debug, sqlx::FromRow, Serialize)]
 struct CatWithCount {

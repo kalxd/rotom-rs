@@ -1,11 +1,6 @@
 use std::{fs, io::Write};
 
-use crate::data::{
-	AppState, User,
-	error::{Error, Result},
-	file as filedata,
-	ty::FileExtension,
-};
+use crate::data::{AppState, User, file as filedata, ty::FileExtension};
 use futures::StreamExt;
 use ntex::web::{
 	DefaultError, Scope, get, post, scope,
@@ -13,6 +8,7 @@ use ntex::web::{
 };
 use ntex_files::NamedFile;
 use ntex_multipart::Multipart;
+use ralts::error::{AppError, QuickThrow, Result};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
@@ -23,7 +19,7 @@ fn guard_file_type(ext: Option<&str>) -> Result<FileExtension> {
 		Some("png") => Ok(FileExtension::Png),
 		Some("jpeg") | Some("jpg") => Ok(FileExtension::Jpg),
 		Some("webp") => Ok(FileExtension::Webp),
-		_ => Err(Error::illegal("无效的文件类型！")),
+		_ => Err(AppError::internal("无效的文件类型！")),
 	}
 }
 
@@ -33,10 +29,7 @@ struct SaveFile {
 }
 
 async fn save_file(mut body: Multipart) -> Result<SaveFile> {
-	let mut field = body
-		.next()
-		.await
-		.ok_or(Error::illegal("没有获取到上传文件！"))??;
+	let mut field = body.next().await.internal("没有获取到上传文件！")??;
 
 	let file_type = field
 		.content_type()

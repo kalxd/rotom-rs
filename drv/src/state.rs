@@ -19,7 +19,7 @@ fn handle_named_field(field: &FieldsNamed) -> TokenStream {
 			if is_app_state_type(&field_type) {
 				quote! {
 					let #field_name = req.app_state::<#field_type>()
-                    .ok_or(Self::Error::Internal("无法正确获取state！".into()))?
+                    .ok_or(Self::Error::internal("无法正确获取state！"))?
                     .clone();
 				}
 			} else {
@@ -58,7 +58,7 @@ fn handle_uname_field(field: &FieldsUnnamed) -> TokenStream {
 			if is_app_state_type(field_type) {
 				quote! {
 					let #field_name = req.app_state::<#field_type>()
-                    .ok_or(Self::Error::Internal("无法正确获取state！".into()))?
+                    .ok_or(Self::Error::internal("无法正确获取state！"))?
                     .clone();
 				}
 			}
@@ -102,7 +102,7 @@ pub fn state_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 	let ast = quote! {
 		impl<E: ntex::web::ErrorRenderer> ntex::web::FromRequest<E> for #data_name {
-			type Error = crate::data::error::Error;
+			type Error = ralts::error::AppError;
 
 			async fn from_request(req: &ntex::web::HttpRequest, _payload: &mut ntex::http::Payload) -> Result<Self, Self::Error> {
 				#def

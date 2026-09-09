@@ -2,11 +2,11 @@ use ntex::web::{
 	DefaultError, Scope, post, scope,
 	types::{Json, State},
 };
+use ralts::error::{QuickThrow, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::data::{
 	AppState, User,
-	error::{Error, Result},
 	ty::{SaltPassword, Uuid},
 };
 
@@ -42,7 +42,7 @@ where 用户名 = $1 and 密码 = md5($2)
 	)
 	.fetch_optional(&state.db)
 	.await?
-	.ok_or(Error::not_auth("用户名或密码不正确！"))?;
+	.no_auth("用户名或密码不正确！")?;
 
 	let token = sqlx::query_scalar!(
 		r#"
