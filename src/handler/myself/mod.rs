@@ -1,6 +1,7 @@
 use ntex::web::{DefaultError, Scope, get, scope, types::Json};
+use ralts::error::Result;
 
-use crate::data::{User, error::Result};
+use crate::data::User;
 
 mod cat;
 mod emoji;

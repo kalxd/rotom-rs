@@ -1,18 +1,16 @@
+use ralts::error::{AppError, Result};
 use std::{
 	fs,
 	path::{Path, PathBuf},
 };
 
-use super::{
-	error::{Error, Result},
-	ty::FileExtension,
-};
+use super::ty::FileExtension;
 
 const BASE_DIR: &str = "static";
 
 pub fn ensure_base_dir() -> Result<()> {
 	let path = Path::new(BASE_DIR);
-	fs::create_dir_all(path).map_err(Error::internal)
+	fs::create_dir_all(path).map_err(AppError::internal)
 }
 
 pub fn with_filename(filename: &str, ext: &FileExtension) -> PathBuf {
