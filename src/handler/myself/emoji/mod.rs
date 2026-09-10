@@ -95,15 +95,14 @@ struct ListBody {
 	pager: Pager,
 }
 
-#[derive(Debug, drv::State, drv::Database)]
-struct ListEmojiState {
-	user: User,
-	#[database]
-	state: AppState,
+#[derive(Debug)]
+struct ListEmojiState<'a> {
+	user: &'a User,
+	state: &'a AppState,
 }
 
-impl ListEmojiState {
-	fn prepare_sql<'a>(&'a self, qb: &mut sqlx::QueryBuilder<sqlx::Postgres>, args: &'a ListBody) {
+impl<'a> ListEmojiState<'a> {
+	fn prepare_sql(&'a self, qb: &mut sqlx::QueryBuilder<sqlx::Postgres>, args: &'a ListBody) {
 		qb.push(" from 表情 where");
 
 		qb.push(" 用户编号 = ");
@@ -124,7 +123,10 @@ impl ListEmojiState {
 
 		self.prepare_sql(&mut qb, &body);
 
-		let c = qb.build_query_scalar::<i64>().fetch_one(self).await?;
+		let c = qb
+			.build_query_scalar::<i64>()
+			.fetch_one(&self.state.db)
+			.await?;
 		Ok(c)
 	}
 
@@ -147,17 +149,27 @@ select
 		qb.push(" offset ");
 		qb.push_bind(body.pager.get_offset());
 
-		let emojis = qb.build_query_as::<Emoji>().fetch_all(self).await?;
+		let emojis = qb
+			.build_query_as::<Emoji>()
+			.fetch_all(&self.state.db)
+			.await?;
 		Ok(emojis)
 	}
 }
 
 #[post("/list")]
 async fn list_emoji(
-	state: ListEmojiState,
+	state: State<AppState>,
 	body: Json<ListBody>,
+	user: User,
 ) -> Result<Json<PagerResult<Emoji>>> {
-	let (count, emojis) = futures::try_join!(state.run_count(&body), state.run_list(&body))?;
+	let list_state = ListEmojiState {
+		user: &user,
+		state: &state,
+	};
+
+	let (count, emojis) =
+		futures::try_join!(list_state.run_count(&body), list_state.run_list(&body))?;
 	Ok(Json(PagerResult {
 		count,
 		hits: emojis,

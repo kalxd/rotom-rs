@@ -3,14 +3,10 @@ name = "rotom-rs"
 version = "0.1.0"
 edition = "2024"
 
-[workspace]
-members = ["drv"]
-
 [dependencies]
 ntex-multipart = "3.2.0"
 ntex-files = "3.2.0"
 sha2 = "0.10.9"
-drv = { path = "./drv" }
 
 [dependencies.uuid]
 version = "1.24.0"

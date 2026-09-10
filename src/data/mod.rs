@@ -9,10 +9,9 @@ pub mod config;
 pub mod file;
 pub mod ty;
 
-#[derive(Debug, Clone, drv::Database)]
+#[derive(Debug, Clone)]
 pub struct AppState {
 	pub salt: Arc<String>,
-	#[database]
 	pub db: PgPool,
 }
 
@@ -62,7 +61,7 @@ where s.令牌 = $1
 "#,
 			uuid as ty::Uuid
 		)
-		.fetch_optional(state)
+		.fetch_optional(&state.db)
 		.await?;
 
 		user.ok_or(AppError::no_auth("用户不存在！"))
