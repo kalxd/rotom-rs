@@ -1,4 +1,7 @@
-use ntex::web::{DefaultError, Scope, post, scope, types::Json};
+use ntex::web::{
+	DefaultError, Scope, post, scope,
+	types::{Json, State},
+};
 use ralts::error::{QuickThrow, Result};
 use serde::{Deserialize, Serialize};
 
@@ -16,35 +19,31 @@ struct CreateBody {
 	desc: Option<String>,
 }
 
-#[derive(Debug, drv::State, drv::Database)]
-struct EmojiState {
-	#[database]
-	file: helper::file::FileState,
-}
-
-impl EmojiState {
-	async fn get_user_cat(&self, user_id: &i32, cat_id: &i32) -> Result<Option<helper::cat::Cat>> {
-		let cat = sqlx::query_as!(
-			helper::cat::Cat,
-			r#"
+async fn get_user_cat(
+	user_id: &i32,
+	cat_id: &i32,
+	state: &AppState,
+) -> Result<Option<helper::cat::Cat>> {
+	let cat = sqlx::query_as!(
+		helper::cat::Cat,
+		r#"
 select 编号 as id, 名称 as name
 from 分类
 where 编号 = $1 and 用户编号 = $2
 "#,
-			cat_id,
-			user_id
-		)
-		.fetch_optional(self)
-		.await?;
+		cat_id,
+		user_id
+	)
+	.fetch_optional(&state.db)
+	.await?;
 
-		Ok(cat)
-	}
+	Ok(cat)
+}
 
-	async fn check_user_cat(&self, user_id: &i32, cat_id: &i32) -> Result<helper::cat::Cat> {
-		self.get_user_cat(user_id, cat_id)
-			.await?
-			.forbidden("所选分类不存在！")
-	}
+async fn check_user_cat(user_id: &i32, cat_id: &i32, state: &AppState) -> Result<helper::cat::Cat> {
+	get_user_cat(user_id, cat_id, state)
+		.await?
+		.forbidden("所选分类不存在！")
 }
 
 #[derive(Serialize, sqlx::FromRow)]
@@ -60,12 +59,12 @@ struct Emoji {
 async fn create_emoji(
 	user: User,
 	body: Json<CreateBody>,
-	state: EmojiState,
+	state: State<AppState>,
 ) -> Result<Json<Emoji>> {
-	state.file.check_file_by_sha(&body.file_sha).await?;
+	helper::file::check_file_by_sha(&body.file_sha, &state).await?;
 
 	if let Some(ref cat_id) = body.cat_id {
-		state.check_user_cat(&user.id, cat_id).await?;
+		check_user_cat(&user.id, cat_id, &state).await?;
 	}
 
 	let emoji = sqlx::query_as!(
@@ -81,7 +80,7 @@ returning 编号 as id, 分类编号 as cat_id, 文件特征 as file_sha, 描述
 		body.file_sha,
 		body.desc,
 	)
-	.fetch_one(&state)
+	.fetch_one(&state.db)
 	.await?;
 
 	Ok(Json(emoji))
@@ -176,14 +175,14 @@ struct UpdateDescBody {
 async fn update_emoji(
 	user: User,
 	body: Json<UpdateBody<UpdateDescBody>>,
-	state: EmojiState,
+	state: State<AppState>,
 ) -> Result<Json<Emoji>> {
 	sqlx::query_scalar!(
 		r#"select 1 from 表情 where 编号 = $1 and 用户编号 = $2 limit 1"#,
 		&body.id,
 		&user.id
 	)
-	.fetch_optional(&state)
+	.fetch_optional(&state.db)
 	.await?
 	.not_found("表情不存在！")?;
 
@@ -199,7 +198,7 @@ returning 编号 as id, 描述 as desc, 分类编号 as cat_id, 文件特征 as 
 		body.data.desc,
 		body.data.cat_id.as_ref()
 	)
-	.fetch_one(&state)
+	.fetch_one(&state.db)
 	.await?;
 
 	Ok(Json(emoji))
@@ -211,7 +210,11 @@ struct DeleteBody {
 }
 
 #[post("/delete")]
-async fn remove_emoji(user: User, body: Json<DeleteBody>, state: EmojiState) -> Result<Json<()>> {
+async fn remove_emoji(
+	user: User,
+	body: Json<DeleteBody>,
+	state: State<AppState>,
+) -> Result<Json<()>> {
 	sqlx::query_scalar!(
 		r#"
 delete from 表情
@@ -220,7 +223,7 @@ where 表情.编号 = $1 and 用户编号 = $2
 		&body.id,
 		&user.id,
 	)
-	.fetch_optional(&state)
+	.fetch_optional(&state.db)
 	.await?;
 
 	Ok(Json(()))

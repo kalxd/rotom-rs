@@ -1,6 +1,5 @@
 use std::{fs, io::Write};
 
-use crate::data::{AppState, User, file as filedata, ty::FileExtension};
 use futures::StreamExt;
 use ntex::web::{
 	DefaultError, Scope, get, post, scope,
@@ -12,6 +11,7 @@ use ralts::error::{AppError, QuickThrow, Result};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
+use crate::data::{AppState, User, file as filedata, ty::FileExtension};
 use crate::helper;
 
 fn guard_file_type(ext: Option<&str>) -> Result<FileExtension> {
@@ -90,8 +90,8 @@ returning 特征 as sha, 扩展名 as "extension: FileExtension";
 }
 
 #[get("/view/{id}")]
-async fn view_file(id: Path<String>, state: helper::file::FileState) -> Result<NamedFile> {
-	let ext = state.check_file_by_sha(&id).await?;
+async fn view_file(id: Path<String>, state: State<AppState>) -> Result<NamedFile> {
+	let ext = helper::file::check_file_by_sha(&id, &state).await?;
 	let filepath = filedata::with_filename(&id, &ext);
 	Ok(NamedFile::open(filepath)?)
 }
